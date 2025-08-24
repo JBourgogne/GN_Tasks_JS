@@ -4,9 +4,8 @@ import react from '@vitejs/plugin-react'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  root: './src',
   build: {
-    outDir: '../dist',
+    outDir: 'dist',
     emptyOutDir: true,
   },
   server: {
@@ -15,15 +14,13 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:3001',
         changeOrigin: true,
-        // In development, proxy to local backend
-        // In production, Vercel handles API routes
       }
     }
   },
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: './test/setup.js',
+    setupFiles: './src/test/setup.js',
     css: true
   }
 })
