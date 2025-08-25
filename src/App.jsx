@@ -35,7 +35,7 @@ function AppContent() {
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
-  const [dashboardMode, setDashboardMode] = useState('full');
+  const [dashboardMode, setDashboardMode] = useState('compact'); // Default to compact
 
   // Initialize app - check backend health ONCE
   useEffect(() => {
@@ -244,15 +244,15 @@ function AppContent() {
               </button>
               
               <div className="dashboard-toggle">
-                <label>View: </label>
+                <label>Dashboard: </label>
                 <select 
                   value={dashboardMode} 
                   onChange={(e) => setDashboardMode(e.target.value)}
                   className="dashboard-select"
                 >
-                  <option value="full">Full Dashboard</option>
-                  <option value="compact">Compact</option>
-                  <option value="hidden">Tasks Only</option>
+                  <option value="compact">Show Below</option>
+                  <option value="hidden">Hidden</option>
+                  <option value="full">Full Size</option>
                 </select>
               </div>
             </div>
@@ -285,79 +285,86 @@ function AppContent() {
           )}
         </header>
 
-        {/* Dashboard */}
-        {dashboardMode !== 'hidden' && (
-          <Dashboard
-            stats={stats}
-            tasks={tasks}
-            loading={loading && !stats}
-            onFilterChange={handleDashboardFilterChange}
-            compactMode={dashboardMode === 'compact'}
-          />
-        )}
-
-        {/* Main Content */}
+        {/* Main Content - Filter and Tasks First */}
         <main className="App-main">
-          {/* Filter Bar */}
-          <FilterBar
-            filters={contextFilters}
-            onFiltersChange={handleFiltersChange}
-            taskStats={stats}
-            availableTags={getAvailableTags()}
-            loading={false}
-            onClearFilters={handleClearAllFilters}
-          />
+          <div className="main-content-grid">
+            {/* Left Column - Filter and Tasks */}
+            <div className="tasks-column">
+              {/* Filter Bar */}
+              <FilterBar
+                filters={contextFilters}
+                onFiltersChange={handleFiltersChange}
+                taskStats={stats}
+                availableTags={getAvailableTags()}
+                loading={false}
+                onClearFilters={handleClearAllFilters}
+              />
 
-          {/* Task List */}
-          <div className="tasks-section">
-            <div className="tasks-header">
-              <h3>
-                Tasks 
-                {contextFilters?.search && ` - Search: "${contextFilters.search}"`}
-                {contextFilters?.status && ` - Status: ${contextFilters.status}`}
-                {contextFilters?.priority && ` - Priority: ${contextFilters.priority}`}
-                {contextFilters?.overdue && ` - Overdue Items`}
-              </h3>
-              
-              {/* Active Filters Summary */}
-              {(contextFilters?.search || contextFilters?.status || contextFilters?.priority || 
-                contextFilters?.tags?.length > 0 || contextFilters?.overdue) && (
-                <div className="active-filters-summary">
-                  <span className="filters-label">Active filters:</span>
-                  {contextFilters.search && (
-                    <span className="filter-tag">Search: "{contextFilters.search}"</span>
-                  )}
-                  {contextFilters.status && (
-                    <span className="filter-tag">Status: {contextFilters.status}</span>
-                  )}
-                  {contextFilters.priority && (
-                    <span className="filter-tag">Priority: {contextFilters.priority}</span>
-                  )}
-                  {contextFilters.tags?.map(tag => (
-                    <span key={tag} className="filter-tag">#{tag}</span>
-                  ))}
-                  {contextFilters.overdue && (
-                    <span className="filter-tag">Overdue</span>
+              {/* Task List */}
+              <div className="tasks-section">
+                <div className="tasks-header">
+                  <h3>
+                    Tasks 
+                    {contextFilters?.search && ` - Search: "${contextFilters.search}"`}
+                    {contextFilters?.status && ` - Status: ${contextFilters.status}`}
+                    {contextFilters?.priority && ` - Priority: ${contextFilters.priority}`}
+                    {contextFilters?.overdue && ` - Overdue Items`}
+                  </h3>
+                  
+                  {/* Active Filters Summary */}
+                  {(contextFilters?.search || contextFilters?.status || contextFilters?.priority || 
+                    contextFilters?.tags?.length > 0 || contextFilters?.overdue) && (
+                    <div className="active-filters-summary">
+                      <span className="filters-label">Active filters:</span>
+                      {contextFilters.search && (
+                        <span className="filter-tag">Search: "{contextFilters.search}"</span>
+                      )}
+                      {contextFilters.status && (
+                        <span className="filter-tag">Status: {contextFilters.status}</span>
+                      )}
+                      {contextFilters.priority && (
+                        <span className="filter-tag">Priority: {contextFilters.priority}</span>
+                      )}
+                      {contextFilters.tags?.map(tag => (
+                        <span key={tag} className="filter-tag">#{tag}</span>
+                      ))}
+                      {contextFilters.overdue && (
+                        <span className="filter-tag">Overdue</span>
+                      )}
+                    </div>
                   )}
                 </div>
-              )}
+                
+                <TaskList
+                  tasks={tasks}
+                  loading={loading && tasks.length === 0}
+                  error={null}
+                  onTaskEdit={handleEditTask}
+                  onTaskDelete={handleDeleteTask}
+                  onTaskStatusChange={handleTaskStatusChange}
+                  onTaskSelect={handleTaskSelect}
+                  selectedTaskId={selectedTask?.id}
+                  emptyStateMessage={
+                    contextFilters?.search || contextFilters?.status || contextFilters?.priority || contextFilters?.overdue
+                      ? "No tasks match the current filters" 
+                      : "No tasks found. Create your first task to get started."
+                  }
+                />
+              </div>
             </div>
-            
-            <TaskList
-              tasks={tasks}
-              loading={loading && tasks.length === 0}
-              error={null}
-              onTaskEdit={handleEditTask}
-              onTaskDelete={handleDeleteTask}
-              onTaskStatusChange={handleTaskStatusChange}
-              onTaskSelect={handleTaskSelect}
-              selectedTaskId={selectedTask?.id}
-              emptyStateMessage={
-                contextFilters?.search || contextFilters?.status || contextFilters?.priority || contextFilters?.overdue
-                  ? "No tasks match the current filters" 
-                  : "No tasks found. Create your first task to get started."
-              }
-            />
+
+            {/* Dashboard Section - Below on mobile, side on desktop */}
+            {dashboardMode !== 'hidden' && (
+              <div className="dashboard-column">
+                <Dashboard
+                  stats={stats}
+                  tasks={tasks}
+                  loading={loading && !stats}
+                  onFilterChange={handleDashboardFilterChange}
+                  compactMode={true}
+                />
+              </div>
+            )}
           </div>
         </main>
 

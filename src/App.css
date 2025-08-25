@@ -1,63 +1,85 @@
-/* Ultra-Compact App.css - Maximum Mobile Density */
+/* Ultra-Compact App.css - New Grid Layout */
 
 .App {
   text-align: center;
   max-width: 100vw;
   width: 100%;
   margin: 0 auto;
-  padding: 6px; /* Reduced from 12px */
+  padding: 4px; /* Reduced for more compact layout */
   min-height: 100vh;
   background: linear-gradient(135deg, #77bc1f 0%, #b4d48c 50%, #ffffff 100%);
   color: white;
   box-sizing: border-box;
-  font-size: 14px; /* Base font size smaller */
+  font-size: 13px; /* Smaller base font */
 }
 
 .App-content {
-  max-width: 1400px;
+  max-width: 1600px; /* Increased for side-by-side layout */
   margin: 0 auto;
   width: 100%;
 }
 
 .App-header {
-  padding: 8px; /* Heavily reduced from 20px */
-  border-radius: 8px; /* Reduced from 12px */
+  padding: 6px; /* Reduced padding */
+  border-radius: 6px;
   color: white;
-  margin-bottom: 8px; /* Reduced from 16px */
+  margin-bottom: 6px;
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.25);
-  box-shadow: 0 2px 8px rgba(119, 188, 31, 0.2); /* Reduced shadow */
+  box-shadow: 0 2px 8px rgba(119, 188, 31, 0.2);
   max-width: 100%;
 }
 
 .App-header h1 {
-  margin: 0 0 4px 0; /* Reduced from 8px */
-  font-size: 1.3rem; /* Reduced from 2rem */
+  margin: 0 0 3px 0;
+  font-size: 1.2rem; /* Reduced */
   font-weight: 700;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .App-header p {
-  margin: 0 0 6px 0; /* Reduced from 16px */
+  margin: 0 0 4px 0;
   opacity: 0.9;
-  font-size: 0.8rem; /* Reduced from 1rem */
+  font-size: 0.75rem; /* Reduced */
 }
 
-/* Main Content Area - Ultra Compact */
+/* Main Content Area - New Grid Layout */
 .App-main {
   display: flex;
   flex-direction: column;
-  gap: 8px; /* Reduced from 16px */
+  gap: 6px; /* Reduced gap */
   max-width: 100%;
+}
+
+.main-content-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr; /* Tasks take 2/3, Dashboard takes 1/3 */
+  gap: 8px;
+  align-items: start;
+}
+
+/* Tasks Column - Filter and Tasks */
+.tasks-column {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0; /* Allow shrinking */
+}
+
+/* Dashboard Column */
+.dashboard-column {
+  min-width: 0; /* Allow shrinking */
+  max-height: 80vh; /* Limit height to prevent scrolling */
+  overflow-y: auto;
 }
 
 /* System Status - Ultra Compact */
 .status-section {
   background: rgba(255, 255, 255, 0.15);
-  padding: 6px; /* Reduced from 12px */
-  border-radius: 6px; /* Reduced from 8px */
-  margin: 4px 0; /* Reduced from 12px */
+  padding: 4px; /* Reduced */
+  border-radius: 4px;
+  margin: 3px 0;
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
@@ -65,28 +87,28 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 6px; /* Reduced from 12px */
+  gap: 4px; /* Reduced gap */
   flex-wrap: wrap;
-  font-size: 0.7rem; /* Reduced from 0.85rem */
+  font-size: 0.65rem; /* Smaller text */
 }
 
 .status-info span {
   color: rgba(255, 255, 255, 0.9);
-  padding: 2px 6px; /* Reduced from 6px 10px */
+  padding: 1px 4px; /* Very small padding */
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px; /* Reduced from 6px */
+  border-radius: 3px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   font-weight: 500;
-  font-size: 0.65rem; /* Very small text */
+  font-size: 0.6rem; /* Very small text */
 }
 
 /* Error and Loading States - Compact */
 .error-banner, .loading-banner {
-  padding: 6px 8px; /* Reduced from 12px 16px */
-  border-radius: 6px; /* Reduced from 8px */
-  margin: 6px 0; /* Reduced from 12px */
+  padding: 4px 6px; /* Reduced */
+  border-radius: 4px;
+  margin: 4px 0;
   backdrop-filter: blur(10px);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
 }
 
 /* Header Controls - Ultra Compact */
@@ -94,49 +116,49 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 6px; /* Reduced from 16px */
-  gap: 8px; /* Reduced from 16px */
+  margin-bottom: 4px; /* Reduced */
+  gap: 6px;
 }
 
 .header-controls {
   display: flex;
   align-items: center;
-  gap: 4px; /* Reduced from 8px */
+  gap: 3px; /* Very tight gap */
   flex-wrap: wrap;
 }
 
 .dashboard-toggle {
   display: flex;
   align-items: center;
-  gap: 3px; /* Reduced from 6px */
+  gap: 2px;
   color: rgba(255, 255, 255, 0.9);
-  font-size: 0.7rem; /* Reduced from 0.85rem */
+  font-size: 0.65rem; /* Smaller */
 }
 
 .dashboard-select {
   background: rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.25);
   color: white;
-  padding: 2px 4px; /* Reduced from 4px 8px */
-  border-radius: 3px; /* Reduced from 4px */
-  font-size: 0.65rem; /* Reduced from 0.8rem */
+  padding: 2px 3px; /* Very small padding */
+  border-radius: 3px;
+  font-size: 0.6rem; /* Very small */
   cursor: pointer;
   backdrop-filter: blur(10px);
 }
 
 /* Button Styles - Ultra Compact */
 .btn {
-  padding: 4px 8px; /* Reduced from 8px 16px */
+  padding: 3px 6px; /* Very small buttons */
   border: none;
-  border-radius: 4px; /* Reduced from 6px */
-  font-size: 0.7rem; /* Reduced from 0.9rem */
+  border-radius: 3px;
+  font-size: 0.65rem; /* Small text */
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 3px; /* Reduced from 6px */
+  gap: 2px;
   text-decoration: none;
   border: 1px solid transparent;
   min-width: auto;
@@ -151,13 +173,13 @@
 .btn-primary {
   background: linear-gradient(135deg, #77bc1f, #b4d48c);
   color: white;
-  box-shadow: 0 1px 4px rgba(119, 188, 31, 0.3); /* Reduced shadow */
+  box-shadow: 0 1px 3px rgba(119, 188, 31, 0.3);
 }
 
 .btn-primary:hover:not(:disabled) {
   background: linear-gradient(135deg, #6aa61c, #a0c77a);
-  transform: translateY(-0.5px); /* Reduced from -1px */
-  box-shadow: 0 2px 6px rgba(119, 188, 31, 0.4); /* Reduced shadow */
+  transform: translateY(-0.5px);
+  box-shadow: 0 2px 5px rgba(119, 188, 31, 0.4);
 }
 
 .btn-secondary {
@@ -174,15 +196,13 @@
 }
 
 /* Main Sections - Ultra Compact */
-.controls-section,
-.tasks-section,
-.stats-section {
+.tasks-section {
   background: rgba(255, 255, 255, 0.15);
-  padding: 8px; /* Reduced from 16px */
-  border-radius: 8px; /* Reduced from 12px */
+  padding: 6px; /* Very small padding */
+  border-radius: 6px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(15px);
-  box-shadow: 0 2px 8px rgba(119, 188, 31, 0.1); /* Reduced shadow */
+  box-shadow: 0 1px 6px rgba(119, 188, 31, 0.1);
   max-width: 100%;
   box-sizing: border-box;
 }
@@ -191,55 +211,55 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px; /* Reduced from 16px */
+  margin-bottom: 6px; /* Reduced */
 }
 
 .section-header h3 {
   margin: 0;
   color: #ffffff;
-  font-size: 1rem; /* Reduced from 1.2rem */
+  font-size: 0.9rem; /* Smaller */
   font-weight: 600;
 }
 
 /* Tasks Section - Ultra Compact */
 .tasks-header {
-  margin-bottom: 8px; /* Reduced from 16px */
-  padding-bottom: 6px; /* Reduced from 12px */
+  margin-bottom: 6px; /* Reduced */
+  padding-bottom: 4px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .tasks-header h3 {
-  margin: 0 0 4px 0; /* Reduced from 8px */
+  margin: 0 0 3px 0; /* Reduced */
   color: #ffffff;
-  font-size: 1rem; /* Reduced from 1.2rem */
+  font-size: 0.9rem; /* Smaller */
   font-weight: 600;
 }
 
 .active-filters-summary {
   display: flex;
   align-items: center;
-  gap: 3px; /* Reduced from 6px */
+  gap: 2px; /* Very tight gap */
   flex-wrap: wrap;
-  margin-top: 3px; /* Reduced from 6px */
+  margin-top: 2px;
 }
 
 .filters-label {
   color: rgba(255, 255, 255, 0.7);
-  font-size: 0.65rem; /* Reduced from 0.8rem */
+  font-size: 0.6rem; /* Very small */
   font-weight: 500;
 }
 
 .filter-tag {
   background: rgba(119, 188, 31, 0.8);
   color: white;
-  padding: 1px 3px; /* Reduced from 3px 6px */
-  border-radius: 6px; /* Reduced from 8px */
-  font-size: 0.6rem; /* Reduced from 0.75rem */
+  padding: 1px 2px; /* Very small padding */
+  border-radius: 4px;
+  font-size: 0.55rem; /* Very small text */
   font-weight: 500;
   border: 1px solid rgba(180, 212, 140, 0.6);
 }
 
-/* Modal Styles - More Compact */
+/* Modal Styles - Compact */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -251,7 +271,7 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: 8px; /* Reduced from 16px */
+  padding: 6px;
   backdrop-filter: blur(8px);
   animation: modalOverlayEnter 0.2s ease-out;
 }
@@ -260,23 +280,23 @@
   max-width: 95vw;
   max-height: 95vh;
   overflow-y: auto;
-  border-radius: 8px; /* Reduced from 12px */
+  border-radius: 6px;
   animation: modalContentEnter 0.2s ease-out;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5); /* Reduced shadow */
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
 }
 
 /* Footer - Ultra Compact */
 .app-footer {
-  margin-top: 16px; /* Reduced from 32px */
+  margin-top: 12px; /* Reduced */
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px; /* Reduced from 16px */
+  gap: 6px;
 }
 
 .development-info, .tech-stack {
   background: rgba(255, 255, 255, 0.15);
-  padding: 8px; /* Reduced from 16px */
-  border-radius: 8px; /* Reduced from 12px */
+  padding: 6px; /* Very small */
+  border-radius: 6px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(15px);
 }
@@ -284,38 +304,38 @@
 .development-info h3, .tech-stack h3 {
   margin-top: 0;
   color: white;
-  font-size: 0.9rem; /* Reduced */
-  margin-bottom: 6px; /* Reduced */
+  font-size: 0.8rem; /* Smaller */
+  margin-bottom: 4px;
 }
 
 .status-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 3px; /* Reduced from 8px */
+  gap: 2px; /* Very tight */
   text-align: left;
 }
 
 .status-item {
   display: flex;
   align-items: center;
-  gap: 4px; /* Reduced from 8px */
-  padding: 3px 6px; /* Reduced from 6px 10px */
+  gap: 3px;
+  padding: 2px 4px; /* Very small */
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px; /* Reduced from 6px */
+  border-radius: 3px;
   border: 1px solid rgba(255, 255, 255, 0.15);
   transition: all 0.2s ease;
-  font-size: 0.7rem; /* Reduced from 0.9rem */
+  font-size: 0.65rem; /* Smaller */
 }
 
 .status-item:hover {
   background: rgba(255, 255, 255, 0.2);
-  transform: translateX(1px); /* Reduced from 2px */
+  transform: translateX(1px);
   border-color: rgba(180, 212, 140, 0.4);
 }
 
 .status-icon {
-  font-size: 0.8rem; /* Reduced from 1rem */
-  width: 12px; /* Reduced from 18px */
+  font-size: 0.7rem; /* Smaller */
+  width: 10px;
   text-align: center;
 }
 
@@ -324,100 +344,43 @@
   padding: 0;
   display: grid;
   grid-template-columns: 1fr;
-  gap: 3px; /* Reduced from 6px */
+  gap: 2px;
 }
 
 .tech-stack li {
   background: rgba(255, 255, 255, 0.1);
-  padding: 4px 6px; /* Reduced from 8px 12px */
-  border-radius: 4px; /* Reduced from 6px */
+  padding: 3px 4px; /* Very small */
+  border-radius: 3px;
   font-weight: 500;
   border: 1px solid rgba(255, 255, 255, 0.15);
   transition: all 0.2s ease;
-  font-size: 0.7rem; /* Reduced from 0.9rem */
+  font-size: 0.65rem; /* Smaller */
 }
 
 .tech-stack li:hover {
   background: rgba(255, 255, 255, 0.2);
-  transform: translateX(1px); /* Reduced from 2px */
+  transform: translateX(1px);
   border-color: rgba(180, 212, 140, 0.4);
 }
 
 /* Ultra-Mobile Responsive Design */
 @media (max-width: 768px) {
+  .main-content-grid {
+    grid-template-columns: 1fr; /* Stack on mobile */
+    gap: 6px;
+  }
+  
+  .dashboard-column {
+    order: 2; /* Dashboard goes below on mobile */
+  }
+  
+  .tasks-column {
+    order: 1; /* Tasks first on mobile */
+  }
+  
   .App {
-    padding: 4px; /* Further reduced */
-    font-size: 13px; /* Even smaller base font */
-  }
-  
-  .App-header {
-    padding: 6px; /* Further reduced */
-  }
-  
-  .App-header h1 {
-    font-size: 1.1rem; /* Smaller on mobile */
-  }
-  
-  .App-header p {
-    font-size: 0.7rem; /* Smaller on mobile */
-    margin-bottom: 4px;
-  }
-  
-  .header-content {
-    flex-direction: column;
-    align-items: stretch;
-    text-align: center;
-    gap: 6px; /* Reduced */
-  }
-  
-  .header-controls {
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 3px;
-  }
-  
-  .status-info {
-    flex-direction: row; /* Keep horizontal but compact */
-    gap: 3px; /* Very tight spacing */
-  }
-  
-  .status-info span {
-    padding: 1px 3px; /* Very compact */
-    font-size: 0.6rem; /* Very small */
-  }
-  
-  .controls-section,
-  .tasks-section,
-  .stats-section {
-    padding: 6px; /* Very compact */
-  }
-  
-  .section-header h3,
-  .tasks-header h3 {
-    font-size: 0.9rem; /* Smaller headers */
-  }
-  
-  .app-footer {
-    grid-template-columns: 1fr;
-    gap: 6px; /* Reduced */
-    margin-top: 12px; /* Reduced */
-  }
-  
-  .modal-overlay {
-    padding: 4px; /* Minimal padding */
-  }
-  
-  .btn {
-    padding: 3px 6px; /* Even smaller buttons */
-    font-size: 0.65rem; /* Smaller text */
-    gap: 2px;
-  }
-}
-
-@media (max-width: 480px) {
-  .App {
-    padding: 2px; /* Minimal padding on small screens */
-    font-size: 12px; /* Smallest base font */
+    padding: 3px; /* Even smaller on mobile */
+    font-size: 12px;
   }
   
   .App-header {
@@ -425,63 +388,151 @@
   }
   
   .App-header h1 {
-    font-size: 1rem;
+    font-size: 1rem; /* Smaller on mobile */
   }
   
-  .controls-section,
-  .tasks-section,
-  .stats-section {
-    padding: 4px; /* Minimal padding */
+  .App-header p {
+    font-size: 0.7rem;
+    margin-bottom: 3px;
   }
   
-  .development-info,
-  .tech-stack {
-    padding: 6px; /* Minimal padding */
+  .header-content {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    gap: 4px;
   }
   
-  .status-item,
-  .tech-stack li {
-    padding: 2px 4px; /* Minimal padding */
-    font-size: 0.65rem; /* Smaller text */
+  .header-controls {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 2px;
   }
   
-  .filter-tag {
-    padding: 1px 2px; /* Minimal padding */
-    font-size: 0.55rem; /* Very small text */
+  .status-info {
+    flex-direction: row;
+    gap: 2px;
+  }
+  
+  .status-info span {
+    padding: 1px 2px;
+    font-size: 0.55rem;
+  }
+  
+  .tasks-section {
+    padding: 4px;
+  }
+  
+  .app-footer {
+    grid-template-columns: 1fr;
+    gap: 4px;
+    margin-top: 8px;
   }
   
   .btn {
     padding: 2px 4px;
     font-size: 0.6rem;
-    min-height: 24px; /* Smaller touch target */
+    gap: 1px;
   }
 }
 
-/* Landscape mobile optimization - Ultra compact */
-@media (max-width: 768px) and (orientation: landscape) {
+@media (max-width: 480px) {
+  .App {
+    padding: 2px; /* Minimal padding on small screens */
+    font-size: 11px;
+  }
+  
   .App-header {
-    padding: 4px 8px; /* Very reduced vertical padding */
+    padding: 3px;
   }
   
   .App-header h1 {
-    font-size: 1rem;
+    font-size: 0.95rem;
+  }
+  
+  .tasks-section {
+    padding: 3px;
+  }
+  
+  .development-info,
+  .tech-stack {
+    padding: 4px;
+  }
+  
+  .status-item,
+  .tech-stack li {
+    padding: 1px 3px;
+    font-size: 0.6rem;
+  }
+  
+  .filter-tag {
+    padding: 0.5px 1px;
+    font-size: 0.5rem;
+  }
+  
+  .btn {
+    padding: 2px 3px;
+    font-size: 0.55rem;
+    min-height: 20px;
+  }
+}
+
+/* Desktop optimization - Better use of space */
+@media (min-width: 1024px) {
+  .main-content-grid {
+    grid-template-columns: 1.8fr 1.2fr; /* Adjust ratio for better balance */
+    gap: 12px;
+  }
+  
+  .App {
+    padding: 8px;
+    font-size: 13px;
+  }
+  
+  .App-header {
+    padding: 10px;
+  }
+  
+  .App-header h1 {
+    font-size: 1.4rem;
   }
   
   .App-header p {
-    margin-bottom: 2px;
+    font-size: 0.9rem;
+    margin-bottom: 8px;
   }
   
-  .status-info {
-    flex-direction: row; /* Horizontal layout in landscape */
-    gap: 4px;
+  .App-main {
+    gap: 10px;
+  }
+  
+  .tasks-section {
+    padding: 10px;
+  }
+  
+  .btn {
+    padding: 5px 8px;
+    font-size: 0.75rem;
+  }
+}
+
+/* Large Desktop - Even more space optimization */
+@media (min-width: 1400px) {
+  .main-content-grid {
+    grid-template-columns: 2fr 1fr; /* More space for tasks */
+    gap: 16px;
+  }
+  
+  .dashboard-column {
+    max-height: 85vh; /* More height on large screens */
   }
 }
 
 /* Loading Spinner - Compact */
 .spinner {
-  width: 10px; /* Reduced from 14px */
-  height: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.3); /* Thinner border */
+  width: 8px; /* Very small */
+  height: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-top: 1px solid white;
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -490,42 +541,6 @@
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
-}
-
-/* Desktop scaling - keep some breathing room on larger screens */
-@media (min-width: 1024px) {
-  .App {
-    padding: 12px;
-    font-size: 14px;
-  }
-  
-  .App-header {
-    padding: 16px;
-  }
-  
-  .App-header h1 {
-    font-size: 1.8rem;
-  }
-  
-  .App-header p {
-    font-size: 1rem;
-    margin-bottom: 12px;
-  }
-  
-  .App-main {
-    gap: 16px;
-  }
-  
-  .controls-section,
-  .tasks-section,
-  .stats-section {
-    padding: 16px;
-  }
-  
-  .btn {
-    padding: 8px 12px;
-    font-size: 0.85rem;
-  }
 }
 
 /* Animation keyframes */
@@ -537,4 +552,86 @@
 @keyframes modalContentEnter {
   from { opacity: 0; transform: scale(0.9); }
   to { opacity: 1; transform: scale(1); }
+}
+
+/* Delete Modal Styles */
+.delete-modal {
+  background: white;
+  color: #333;
+  max-width: 400px;
+  width: 90%;
+}
+
+.delete-modal-header {
+  background: #ff4757;
+  color: white;
+  padding: 8px 12px;
+  margin: 0;
+}
+
+.delete-modal-header h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.delete-modal-body {
+  padding: 12px;
+}
+
+.task-preview {
+  background: #f8f9fa;
+  padding: 8px;
+  border-radius: 4px;
+  margin: 8px 0;
+  border-left: 3px solid #ff4757;
+}
+
+.task-preview h4 {
+  margin: 0 0 4px 0;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.task-preview p {
+  margin: 0 0 4px 0;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.delete-warning {
+  color: #ff4757;
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin: 8px 0;
+}
+
+.delete-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid #dee2e6;
+  margin: 0;
+}
+
+.btn-cancel {
+  background: #6c757d;
+  color: white;
+  border: 1px solid #6c757d;
+}
+
+.btn-cancel:hover {
+  background: #5a6268;
+  border-color: #5a6268;
+}
+
+.btn-danger {
+  background: #ff4757;
+  color: white;
+  border: 1px solid #ff4757;
+}
+
+.btn-danger:hover {
+  background: #ff3838;
+  border-color: #ff3838;
 }
