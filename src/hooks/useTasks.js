@@ -1,9 +1,9 @@
-// src/hooks/useTasks.js - Stable version that eliminates infinite loops
+// src/hooks/useTasks.js - Updated version with better delete handling
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTaskState, useTaskDispatch, taskActions } from '../context/TaskContext.jsx';
 import { useTasksApi } from './useApi.js';
 
-// Main hook for task management - simplified to prevent infinite loops
+// Main hook for task management - with improved delete handling
 export function useTasks() {
   const state = useTaskState();
   const dispatch = useTaskDispatch();
@@ -83,7 +83,7 @@ export function useTasks() {
       isLoadingRef.current = false;
       dispatch(taskActions.setLoading(false));
     }
-  }, [api, dispatch, cleanFilters]); // Removed state.filters from dependencies
+  }, [api, dispatch, cleanFilters]);
 
   // Load statistics - simplified
   const loadStats = useCallback(async () => {
@@ -184,34 +184,62 @@ export function useTasks() {
     }
   }, [state.tasks, api, dispatch, loadStats]);
 
-  // Delete a task
+  // Delete a task - IMPROVED VERSION
   const deleteTask = useCallback(async (id) => {
-    const taskToDelete = state.tasks.find(task => task.id === id);
+    console.log('deleteTask: Starting deletion for ID:', id, 'Type:', typeof id);
     
-    // Optimistic delete
-    dispatch(taskActions.deleteTask(id));
+    const taskToDelete = state.tasks.find(task => task.id === id);
+    if (!taskToDelete) {
+      console.error('deleteTask: Task not found in local state:', id);
+      const error = new Error('Task not found in local state. The task may have already been deleted.');
+      dispatch(taskActions.setError(error.message));
+      throw error;
+    }
+    
+    console.log('deleteTask: Found task to delete:', taskToDelete.title);
+    
+    // Don't do optimistic delete for this operation to avoid sync issues
+    // Let the server be the source of truth
 
     try {
-      console.log('deleteTask: Deleting task:', id);
+      console.log('deleteTask: Calling API delete for task:', id);
       
       const result = await api.deleteTask(id);
+      console.log('deleteTask: API response:', result);
 
       if (result && result.success) {
-        console.log('deleteTask: Success');
+        // Only remove from local state after successful server deletion
+        dispatch(taskActions.deleteTask(id));
+        console.log('deleteTask: Successfully deleted task:', result.data.task.title);
+        
+        // Refresh stats
         loadStats().catch(console.error);
+        
         return true;
       } else {
-        throw new Error(result?.error?.message || 'Failed to delete task');
+        console.error('deleteTask: API returned success=false:', result);
+        throw new Error(result?.error?.message || 'Server returned failure response');
       }
     } catch (error) {
-      console.error('deleteTask: Error:', error);
+      console.error('deleteTask: Error during deletion:', error);
       
-      // Revert optimistic delete
-      if (taskToDelete) {
-        dispatch(taskActions.addTask(taskToDelete));
+      // Check if it's a "not found" error - this might mean it was already deleted
+      if (error.message && error.message.includes('Task not found')) {
+        console.log('deleteTask: Task was already deleted on server, removing from local state');
+        dispatch(taskActions.deleteTask(id));
+        loadStats().catch(console.error);
+        return true;
       }
       
-      dispatch(taskActions.setError(`Failed to delete task: ${error.message}`));
+      // For other errors, show user-friendly message
+      let errorMessage = 'Failed to delete task';
+      if (error.details?.debug?.message) {
+        errorMessage += ': ' + error.details.debug.message;
+      } else if (error.message) {
+        errorMessage += ': ' + error.message;
+      }
+      
+      dispatch(taskActions.setError(errorMessage));
       throw error;
     }
   }, [state.tasks, api, dispatch, loadStats]);
@@ -233,7 +261,7 @@ export function useTasks() {
       const updatedFilters = { ...state.filters, ...newFilters };
       loadTasks(updatedFilters);
     }, 300);
-  }, [dispatch, loadTasks]); // Removed state.filters from dependencies
+  }, [dispatch, loadTasks]);
 
   // Update search - with debouncing
   const updateSearch = useCallback(async (searchTerm) => {
@@ -253,7 +281,7 @@ export function useTasks() {
       const updatedFilters = { ...state.filters, search: trimmedSearch };
       loadTasks(updatedFilters);
     }, 500); // Longer debounce for search
-  }, [dispatch, loadTasks]); // Removed state.filters from dependencies
+  }, [dispatch, loadTasks]);
 
   // Clear all filters
   const clearFilters = useCallback(async () => {
@@ -293,7 +321,7 @@ export function useTasks() {
       console.log('Initial load effect triggered');
       loadTasks();
     }
-  }, [hasInitiallyLoaded, loadTasks]); // Only depend on hasInitiallyLoaded
+  }, [hasInitiallyLoaded, loadTasks]);
 
   // Stats load effect - run once and then periodically
   useEffect(() => {
@@ -310,7 +338,7 @@ export function useTasks() {
       console.log('Cleaning up stats interval');
       clearInterval(interval);
     };
-  }, []); // Empty dependency array - only run on mount/unmount
+  }, []);
 
   // Cleanup effect
   useEffect(() => {

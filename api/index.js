@@ -1,4 +1,4 @@
-// api/index.js - Consolidated API handler for all endpoints
+// api/index.js - Fixed version with better delete handling
 import { getTaskRepository } from './data/TaskRepository.js';
 import { setCorsHeaders, handleCorsPrelight } from './middleware/cors.js';
 import { logRequest, logResponse } from './middleware/logger.js';
@@ -437,14 +437,47 @@ async function handleIndividualTask(req, taskId, repository) {
 
     case 'DELETE':
       try {
-        const deletedTask = await repository.delete(taskId);
-        if (!deletedTask) {
+        console.log('DELETE request for task ID:', taskId);
+        
+        // First, let's check if the task exists and log repository state
+        const allTasks = await repository.getAllRaw();
+        console.log('Current tasks in repository:', allTasks.length);
+        console.log('Task IDs in repository:', allTasks.map(t => t.id));
+        
+        const existingTask = await repository.findById(taskId);
+        if (!existingTask) {
+          console.log('Task not found in repository:', taskId);
+          
+          // Let's provide more helpful debugging info
           throw new APIError('Task not found', 404, {
             type: 'resource_not_found',
             resource: 'task',
-            resourceId: taskId
+            resourceId: taskId,
+            debug: {
+              taskId,
+              totalTasks: allTasks.length,
+              availableTaskIds: allTasks.map(t => t.id).slice(0, 10), // First 10 IDs for debugging
+              message: 'This task may have been deleted by another request or may not exist. Try refreshing the page.'
+            }
           });
         }
+        
+        console.log('Found task to delete:', existingTask.title);
+        
+        const deletedTask = await repository.delete(taskId);
+        
+        if (!deletedTask) {
+          throw new APIError('Failed to delete task', 500, {
+            type: 'delete_error',
+            resource: 'task',
+            resourceId: taskId,
+            debug: {
+              message: 'Repository delete operation returned null'
+            }
+          });
+        }
+        
+        console.log('Task deleted successfully:', deletedTask.title);
         
         return {
           task: deletedTask,
