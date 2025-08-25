@@ -76,25 +76,43 @@ const taskSchemas = {
 
   // Query parameter validation schema
   filters: Joi.object({
-    status: Joi.string().valid('todo', 'in_progress', 'completed').messages({
-      'any.only': 'Status filter must be one of: todo, in_progress, completed'
-    }),
+    status: Joi.string()
+      .valid('todo', 'in_progress', 'completed')
+      .allow('')  // Allow empty string
+      .messages({
+        'any.only': 'Status filter must be one of: todo, in_progress, completed'
+      }),
     
-    priority: Joi.string().valid('low', 'medium', 'high').messages({
-      'any.only': 'Priority filter must be one of: low, medium, high'
-    }),
+    priority: Joi.string()
+      .valid('low', 'medium', 'high')
+      .allow('')  // Allow empty string
+      .messages({
+        'any.only': 'Priority filter must be one of: low, medium, high'
+      }),
     
-    tags: Joi.string().messages({
-      'string.base': 'Tags filter must be a comma-separated string'
-    }),
+    tags: Joi.string()
+      .allow('')  // Allow empty string
+      .messages({
+        'string.base': 'Tags filter must be a comma-separated string'
+      }),
     
-    search: Joi.string().max(200).messages({
-      'string.max': 'Search query must be 200 characters or less'
-    }),
+    search: Joi.string()
+      .max(200)
+      .allow('')  // Allow empty string
+      .messages({
+        'string.max': 'Search query must be 200 characters or less'
+      }),
     
-    overdue: Joi.boolean().messages({
-      'boolean.base': 'Overdue filter must be true or false'
-    }),
+    overdue: Joi.alternatives()
+      .try(
+        Joi.boolean(),
+        Joi.string().valid('true', 'false', ''),  // Allow string versions and empty
+        Joi.valid(null)
+      )
+      .default(false)
+      .messages({
+        'alternatives.match': 'Overdue filter must be true, false, or empty'
+      }),
     
     sortBy: Joi.string()
       .valid('title', 'status', 'priority', 'createdAt', 'updatedAt', 'dueDate')
@@ -110,28 +128,34 @@ const taskSchemas = {
         'any.only': 'Sort order must be asc or desc'
       }),
     
-    limit: Joi.number()
-      .integer()
-      .min(1)
-      .max(100)
+    limit: Joi.alternatives()
+      .try(
+        Joi.number().integer().min(1).max(100),
+        Joi.string().pattern(/^\d+$/).custom((value) => {
+          const num = parseInt(value);
+          if (num < 1 || num > 100) throw new Error('Must be between 1 and 100');
+          return num;
+        })
+      )
       .default(50)
       .messages({
-        'number.base': 'Limit must be a number',
-        'number.integer': 'Limit must be an integer',
-        'number.min': 'Limit must be at least 1',
-        'number.max': 'Limit cannot exceed 100'
+        'alternatives.match': 'Limit must be a number between 1 and 100'
       }),
     
-    offset: Joi.number()
-      .integer()
-      .min(0)
+    offset: Joi.alternatives()
+      .try(
+        Joi.number().integer().min(0),
+        Joi.string().pattern(/^\d+$/).custom((value) => {
+          const num = parseInt(value);
+          if (num < 0) throw new Error('Cannot be negative');
+          return num;
+        })
+      )
       .default(0)
       .messages({
-        'number.base': 'Offset must be a number',
-        'number.integer': 'Offset must be an integer',
-        'number.min': 'Offset cannot be negative'
+        'alternatives.match': 'Offset must be a non-negative number'
       })
-  })
+  }).options({ stripUnknown: true })  // Remove unknown query params
 };
 
 // Validation middleware functions
@@ -164,7 +188,8 @@ function validateTaskFilters(req) {
   const { error, value } = taskSchemas.filters.validate(req.query, {
     abortEarly: false,
     stripUnknown: true,
-    convert: true
+    convert: true,
+    allowUnknown: false
   });
 
   if (error) {
@@ -176,21 +201,45 @@ function validateTaskFilters(req) {
 
     throw new APIError('Invalid query parameters', 400, {
       type: 'validation_error',
-      errors: validationErrors
+      errors: validationErrors,
+      received: req.query
     });
   }
 
-  // Process special fields
+  // Process special fields more robustly
   if (value.tags && typeof value.tags === 'string') {
-    value.tags = value.tags.split(',')
-      .map(tag => tag.trim().toLowerCase())
-      .filter(tag => tag.length > 0);
+    if (value.tags.trim() === '') {
+      delete value.tags;  // Remove empty tags
+    } else {
+      value.tags = value.tags.split(',')
+        .map(tag => tag.trim().toLowerCase())
+        .filter(tag => tag.length > 0);
+      
+      if (value.tags.length === 0) {
+        delete value.tags;
+      }
+    }
   }
 
-  // Convert overdue string to boolean if needed
-  if (typeof value.overdue === 'string') {
-    value.overdue = value.overdue.toLowerCase() === 'true';
+  // Convert overdue to proper boolean or remove if empty/false
+  if (value.overdue !== undefined) {
+    if (typeof value.overdue === 'string') {
+      if (value.overdue === 'true') {
+        value.overdue = true;
+      } else {
+        delete value.overdue;  // Remove false/empty overdue
+      }
+    } else if (value.overdue === false) {
+      delete value.overdue;  // Remove explicit false
+    }
   }
+
+  // Remove empty string filters
+  Object.keys(value).forEach(key => {
+    if (value[key] === '') {
+      delete value[key];
+    }
+  });
 
   return value;
 }

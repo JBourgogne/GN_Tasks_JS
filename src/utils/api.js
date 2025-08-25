@@ -1,6 +1,5 @@
-/**
- * API utility functions for frontend
- */
+// API utility functions for frontend
+
 
 // Base API configuration
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
@@ -44,6 +43,10 @@ async function apiRequest(endpoint, options = {}) {
       // Handle API error responses
       const message = data?.error?.message || data?.message || `HTTP ${response.status}`;
       const details = data?.error?.details || data?.details || null;
+      
+      // Log the full error for debugging
+      console.error('API Error Response:', data);
+      
       throw new APIError(message, response.status, details);
     }
 
@@ -62,51 +65,128 @@ async function apiRequest(endpoint, options = {}) {
   }
 }
 
+// Helper function to clean query parameters
+function cleanQueryParams(params) {
+  const cleaned = {};
+  
+  Object.entries(params).forEach(([key, value]) => {
+    // Skip undefined, null, empty string, or empty array values
+    if (value === undefined || 
+        value === null || 
+        value === '' || 
+        (Array.isArray(value) && value.length === 0)) {
+      return;
+    }
+    
+    // Convert arrays to comma-separated strings
+    if (Array.isArray(value)) {
+      const filteredArray = value.filter(item => item !== null && item !== undefined && item !== '');
+      if (filteredArray.length > 0) {
+        cleaned[key] = filteredArray.join(',');
+      }
+    } else {
+      cleaned[key] = value;
+    }
+  });
+  
+  return cleaned;
+}
+
 // Task API functions
 export const tasksAPI = {
   // Get all tasks with optional filters
   async getTasks(filters = {}) {
-    const params = new URLSearchParams();
+    // Clean the filters object to remove empty values
+    const cleanFilters = cleanQueryParams(filters);
     
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        if (Array.isArray(value)) {
-          params.append(key, value.join(','));
-        } else {
-          params.append(key, value.toString());
-        }
-      }
-    });
-
-    const queryString = params.toString();
-    const endpoint = `/tasks${queryString ? `?${queryString}` : ''}`;
+    // Build query string only if we have parameters
+    const queryString = Object.keys(cleanFilters).length > 0 
+      ? '?' + new URLSearchParams(cleanFilters).toString()
+      : '';
+    
+    const endpoint = `/tasks${queryString}`;
+    
+    console.log('API Request:', `${API_BASE}${endpoint}`);
     
     return apiRequest(endpoint);
   },
 
   // Get a single task by ID
   async getTask(id) {
+    if (!id) {
+      throw new APIError('Task ID is required', 400);
+    }
     return apiRequest(`/tasks/${id}`);
   },
 
   // Create a new task
   async createTask(taskData) {
+    if (!taskData || !taskData.title?.trim()) {
+      throw new APIError('Task title is required', 400);
+    }
+    
+    // Clean the task data
+    const cleanTaskData = {
+      title: taskData.title.trim(),
+      description: taskData.description?.trim() || '',
+      status: taskData.status || 'todo',
+      priority: taskData.priority || 'medium',
+      dueDate: taskData.dueDate || null,
+      tags: Array.isArray(taskData.tags) 
+        ? taskData.tags.filter(tag => tag && tag.trim()).map(tag => tag.trim())
+        : []
+    };
+    
     return apiRequest('/tasks', {
       method: 'POST',
-      body: JSON.stringify(taskData)
+      body: JSON.stringify(cleanTaskData)
     });
   },
 
   // Update an existing task
   async updateTask(id, updates) {
+    if (!id) {
+      throw new APIError('Task ID is required', 400);
+    }
+    
+    if (!updates || Object.keys(updates).length === 0) {
+      throw new APIError('At least one field must be updated', 400);
+    }
+    
+    // Clean the updates object
+    const cleanUpdates = {};
+    
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        if (key === 'title' && typeof value === 'string') {
+          const trimmed = value.trim();
+          if (trimmed) cleanUpdates[key] = trimmed;
+        } else if (key === 'description' && typeof value === 'string') {
+          cleanUpdates[key] = value.trim();
+        } else if (key === 'tags' && Array.isArray(value)) {
+          cleanUpdates[key] = value.filter(tag => tag && tag.trim()).map(tag => tag.trim());
+        } else {
+          cleanUpdates[key] = value;
+        }
+      }
+    });
+    
+    if (Object.keys(cleanUpdates).length === 0) {
+      throw new APIError('No valid updates provided', 400);
+    }
+    
     return apiRequest(`/tasks/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(updates)
+      body: JSON.stringify(cleanUpdates)
     });
   },
 
   // Delete a task
   async deleteTask(id) {
+    if (!id) {
+      throw new APIError('Task ID is required', 400);
+    }
+    
     return apiRequest(`/tasks/${id}`, {
       method: 'DELETE'
     });
@@ -130,59 +210,57 @@ export const apiHelpers = {
     const filters = {};
     
     const status = searchParams.get('status');
-    if (status) filters.status = status;
+    if (status && status.trim()) filters.status = status.trim();
     
     const priority = searchParams.get('priority');
-    if (priority) filters.priority = priority;
+    if (priority && priority.trim()) filters.priority = priority.trim();
     
     const tags = searchParams.get('tags');
-    if (tags) filters.tags = tags.split(',');
+    if (tags && tags.trim()) {
+      filters.tags = tags.split(',').map(tag => tag.trim()).filter(Boolean);
+    }
     
     const search = searchParams.get('search');
-    if (search) filters.search = search;
+    if (search && search.trim()) filters.search = search.trim();
     
     const sortBy = searchParams.get('sortBy');
-    if (sortBy) filters.sortBy = sortBy;
+    if (sortBy && sortBy.trim()) filters.sortBy = sortBy.trim();
     
     const sortOrder = searchParams.get('sortOrder');
-    if (sortOrder) filters.sortOrder = sortOrder;
+    if (sortOrder && ['asc', 'desc'].includes(sortOrder)) filters.sortOrder = sortOrder;
     
     const overdue = searchParams.get('overdue');
     if (overdue === 'true') filters.overdue = true;
+    // Note: we don't set overdue = false explicitly, we just omit it
 
     const limit = searchParams.get('limit');
-    if (limit) filters.limit = parseInt(limit);
+    if (limit && !isNaN(limit)) filters.limit = Math.min(Math.max(parseInt(limit), 1), 100);
 
     const offset = searchParams.get('offset');
-    if (offset) filters.offset = parseInt(offset);
+    if (offset && !isNaN(offset)) filters.offset = Math.max(parseInt(offset), 0);
     
     return filters;
   },
 
   // Convert filters to URL search params
   filtersToSearchParams(filters) {
-    const params = new URLSearchParams();
-    
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        if (Array.isArray(value) && value.length > 0) {
-          params.set(key, value.join(','));
-        } else if (!Array.isArray(value)) {
-          params.set(key, value.toString());
-        }
-      }
-    });
-    
-    return params;
+    const cleanFilters = cleanQueryParams(filters);
+    return new URLSearchParams(cleanFilters);
   },
 
   // Format error message for display
   formatErrorMessage(error) {
     if (error instanceof APIError) {
+      // Handle validation errors specially
+      if (error.details?.type === 'validation_error' && error.details?.errors) {
+        const fieldErrors = error.details.errors.map(err => `${err.field}: ${err.message}`);
+        return `Validation Error: ${fieldErrors.join(', ')}`;
+      }
+      
       if (error.details && Array.isArray(error.details)) {
-        // Validation errors
         return error.details.map(detail => detail.message).join(', ');
       }
+      
       return error.message;
     }
     
@@ -199,8 +277,11 @@ export const apiHelpers = {
       } catch (error) {
         lastError = error;
         
-        // Don't retry client errors (4xx)
-        if (error instanceof APIError && error.status >= 400 && error.status < 500) {
+        // Don't retry client errors (4xx) except for 429 (rate limit)
+        if (error instanceof APIError && 
+            error.status >= 400 && 
+            error.status < 500 && 
+            error.status !== 429) {
           throw error;
         }
         
@@ -209,7 +290,7 @@ export const apiHelpers = {
           break;
         }
         
-        // Wait before retrying
+        // Wait before retrying with exponential backoff
         await new Promise(resolve => setTimeout(resolve, delay * attempt));
       }
     }

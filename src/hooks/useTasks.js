@@ -1,24 +1,65 @@
+// Hooks for using Tasks
 import { useCallback, useEffect } from 'react';
 import { useTaskState, useTaskDispatch, taskActions } from '../context/TaskContext.jsx';
 import { useTasksApi } from './useApi.js';
 
-/**
- * Main hook for task management - combines context state with API calls
- */
+// Main hook for task management - combines context state with API calls
 export function useTasks() {
   const state = useTaskState();
   const dispatch = useTaskDispatch();
   const api = useTasksApi();
 
+  // Helper function to clean filters before sending to API
+  const cleanFilters = useCallback((filters) => {
+    const cleaned = {};
+    
+    // Only include non-empty, meaningful values
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        if (key === 'tags' && Array.isArray(value)) {
+          const cleanTags = value.filter(tag => tag && tag.trim());
+          if (cleanTags.length > 0) {
+            cleaned[key] = cleanTags;
+          }
+        } else if (key === 'overdue') {
+          // Only include overdue if it's explicitly true
+          if (value === true || value === 'true') {
+            cleaned[key] = true;
+          }
+          // Don't include overdue: false - just omit it
+        } else if (key === 'search' && typeof value === 'string') {
+          const trimmed = value.trim();
+          if (trimmed) {
+            cleaned[key] = trimmed;
+          }
+        } else if (['status', 'priority', 'sortBy', 'sortOrder'].includes(key)) {
+          if (value && value.trim && value.trim()) {
+            cleaned[key] = value.trim();
+          } else if (typeof value !== 'string' && value) {
+            cleaned[key] = value;
+          }
+        } else {
+          cleaned[key] = value;
+        }
+      }
+    });
+
+    return cleaned;
+  }, []);
+
   // Load tasks based on current filters
   const loadTasks = useCallback(async (overrideFilters = null) => {
-    const filters = overrideFilters || state.filters;
-    
     try {
       dispatch(taskActions.setLoading(true));
       
-      const result = await api.fetchTasks(filters, {
+      const filtersToUse = overrideFilters || state.filters;
+      const cleanedFilters = cleanFilters(filtersToUse);
+      
+      console.log('Loading tasks with cleaned filters:', cleanedFilters);
+      
+      const result = await api.fetchTasks(cleanedFilters, {
         onError: (error) => {
+          console.error('Load tasks error:', error);
           dispatch(taskActions.setError(`Failed to load tasks: ${error.message}`));
         }
       });
@@ -27,16 +68,16 @@ export function useTasks() {
         dispatch(taskActions.setTasks(result.data));
       }
     } catch (error) {
-      // Error is already handled by the API hook
       console.error('Load tasks error:', error);
+      // Error is already handled by the API hook and onError callback
     }
-  }, [state.filters, api, dispatch]);
+  }, [state.filters, api, dispatch, cleanFilters]);
 
   // Load statistics
   const loadStats = useCallback(async () => {
     try {
       const result = await api.fetchStats({
-        showErrorToUser: false, // Don't show stats errors to user
+        showErrorToUser: false,
         onError: (error) => {
           console.error('Failed to load stats:', error);
         }
@@ -46,7 +87,6 @@ export function useTasks() {
         dispatch(taskActions.setStats(result.data.statistics));
       }
     } catch (error) {
-      // Stats are nice-to-have, don't break the UI
       console.error('Stats error:', error);
     }
   }, [api, dispatch]);
@@ -54,23 +94,31 @@ export function useTasks() {
   // Create a new task
   const createTask = useCallback(async (taskData) => {
     try {
-      const result = await api.createTask(taskData, {
+      // Clean task data before sending
+      const cleanTaskData = {
+        title: taskData.title?.trim(),
+        description: taskData.description?.trim() || '',
+        status: taskData.status || 'todo',
+        priority: taskData.priority || 'medium',
+        dueDate: taskData.dueDate || null,
+        tags: Array.isArray(taskData.tags) 
+          ? taskData.tags.filter(tag => tag && tag.trim()).map(tag => tag.trim())
+          : []
+      };
+
+      const result = await api.createTask(cleanTaskData, {
         onError: (error) => {
           dispatch(taskActions.setError(`Failed to create task: ${error.message}`));
         }
       });
 
       if (result && result.success) {
-        // Optimistically add to state
         dispatch(taskActions.addTask(result.data.task));
-        
-        // Reload stats
-        loadStats();
-        
+        loadStats(); // Refresh stats
         return result.data.task;
       }
     } catch (error) {
-      throw error; // Re-throw so caller can handle
+      throw error;
     }
   }, [api, dispatch, loadStats]);
 
@@ -88,7 +136,24 @@ export function useTasks() {
     }
 
     try {
-      const result = await api.updateTask(id, updates, {
+      // Clean updates before sending
+      const cleanUpdates = {};
+      Object.entries(updates).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          if (key === 'title' && typeof value === 'string') {
+            const trimmed = value.trim();
+            if (trimmed) cleanUpdates[key] = trimmed;
+          } else if (key === 'description' && typeof value === 'string') {
+            cleanUpdates[key] = value.trim();
+          } else if (key === 'tags' && Array.isArray(value)) {
+            cleanUpdates[key] = value.filter(tag => tag && tag.trim()).map(tag => tag.trim());
+          } else {
+            cleanUpdates[key] = value;
+          }
+        }
+      });
+
+      const result = await api.updateTask(id, cleanUpdates, {
         onError: (error) => {
           // Revert optimistic update on error
           if (currentTask) {
@@ -99,7 +164,6 @@ export function useTasks() {
       });
 
       if (result && result.success) {
-        // Update with server response
         dispatch(taskActions.updateTask(result.data.task));
         
         // Reload stats if status changed
@@ -110,6 +174,10 @@ export function useTasks() {
         return result.data.task;
       }
     } catch (error) {
+      // Revert optimistic update on error
+      if (currentTask) {
+        dispatch(taskActions.updateTask(currentTask));
+      }
       throw error;
     }
   }, [state.tasks, api, dispatch, loadStats]);
@@ -132,31 +200,41 @@ export function useTasks() {
       });
 
       if (result && result.success) {
-        // Reload stats
-        loadStats();
-        
+        loadStats(); // Refresh stats
         return true;
       }
     } catch (error) {
+      // Revert optimistic delete on error
+      if (taskToDelete) {
+        dispatch(taskActions.addTask(taskToDelete));
+      }
       throw error;
     }
   }, [state.tasks, api, dispatch, loadStats]);
 
   // Update filters and reload tasks
   const updateFilters = useCallback(async (newFilters) => {
-    const updatedFilters = { ...state.filters, ...newFilters };
-    dispatch(taskActions.setFilters(newFilters));
+    // Clean the new filters and merge with existing
+    const cleanedNewFilters = cleanFilters(newFilters);
+    const updatedFilters = { ...state.filters, ...cleanedNewFilters };
     
-    // Load tasks with new filters
+    dispatch(taskActions.setFilters(cleanedNewFilters));
+    
+    // Load tasks with cleaned filters
     await loadTasks(updatedFilters);
-  }, [state.filters, dispatch, loadTasks]);
+  }, [state.filters, dispatch, loadTasks, cleanFilters]);
 
   // Update search and reload tasks (with debouncing)
   const updateSearch = useCallback(async (searchTerm) => {
-    dispatch(taskActions.setSearch(searchTerm));
+    const trimmedSearch = searchTerm?.trim() || '';
     
-    // Debouncing will be handled by the component using this hook
-    const updatedFilters = { ...state.filters, search: searchTerm };
+    dispatch(taskActions.setSearch(trimmedSearch));
+    
+    const updatedFilters = { 
+      ...state.filters, 
+      search: trimmedSearch 
+    };
+    
     await loadTasks(updatedFilters);
   }, [state.filters, dispatch, loadTasks]);
 
@@ -169,6 +247,7 @@ export function useTasks() {
       sortBy, 
       sortOrder 
     };
+    
     await loadTasks(updatedFilters);
   }, [state.filters, dispatch, loadTasks]);
 
@@ -185,7 +264,12 @@ export function useTasks() {
     };
     
     dispatch(taskActions.setFilters(clearedFilters));
-    await loadTasks(clearedFilters);
+    
+    // Load tasks with minimal filters (only the defaults that matter)
+    await loadTasks({
+      sortBy: 'updatedAt',
+      sortOrder: 'desc'
+    });
   }, [dispatch, loadTasks]);
 
   // Select a task
@@ -220,8 +304,8 @@ export function useTasks() {
     // Only auto-load if we don't have tasks yet, or if non-search filters changed
     const hasNonSearchFilters = state.filters.status || 
                                state.filters.priority || 
-                               state.filters.tags.length > 0 ||
-                               state.filters.overdue;
+                               (Array.isArray(state.filters.tags) && state.filters.tags.length > 0) ||
+                               state.filters.overdue === true;
 
     if (state.tasks.length === 0 || hasNonSearchFilters) {
       loadTasks();
