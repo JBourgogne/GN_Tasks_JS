@@ -96,26 +96,18 @@ function cleanQueryParams(params) {
 export const tasksAPI = {
   // Get all tasks with optional filters
   async getTasks(filters = {}) {
-    // Clean the filters object to remove empty values
     const cleanFilters = cleanQueryParams(filters);
-    
-    // Build query string only if we have parameters
     const queryString = Object.keys(cleanFilters).length > 0 
       ? '?' + new URLSearchParams(cleanFilters).toString()
       : '';
     
     const endpoint = `/tasks${queryString}`;
-    
-    console.log('API Request:', `${API_BASE}${endpoint}`);
-    
     return apiRequest(endpoint);
   },
 
-  // Get a single task by ID
+  // Get a single task by ID  
   async getTask(id) {
-    if (!id) {
-      throw new APIError('Task ID is required', 400);
-    }
+    if (!id) throw new APIError('Task ID is required', 400);
     return apiRequest(`/tasks/${id}`);
   },
 
@@ -125,7 +117,6 @@ export const tasksAPI = {
       throw new APIError('Task title is required', 400);
     }
     
-    // Clean the task data
     const cleanTaskData = {
       title: taskData.title.trim(),
       description: taskData.description?.trim() || '',
@@ -145,17 +136,12 @@ export const tasksAPI = {
 
   // Update an existing task
   async updateTask(id, updates) {
-    if (!id) {
-      throw new APIError('Task ID is required', 400);
-    }
-    
+    if (!id) throw new APIError('Task ID is required', 400);
     if (!updates || Object.keys(updates).length === 0) {
       throw new APIError('At least one field must be updated', 400);
     }
     
-    // Clean the updates object
     const cleanUpdates = {};
-    
     Object.entries(updates).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
         if (key === 'title' && typeof value === 'string') {
@@ -183,23 +169,18 @@ export const tasksAPI = {
 
   // Delete a task
   async deleteTask(id) {
-    if (!id) {
-      throw new APIError('Task ID is required', 400);
-    }
-    
-    return apiRequest(`/tasks/${id}`, {
-      method: 'DELETE'
-    });
+    if (!id) throw new APIError('Task ID is required', 400);
+    return apiRequest(`/tasks/${id}`, { method: 'DELETE' });
   },
 
-  // Get task statistics
+  // Get task statistics - UPDATED ENDPOINT
   async getStats() {
-    return apiRequest('/stats');
+    return apiRequest('/tasks/stats');
   },
 
-  // Health check
+  // Health check - UPDATED ENDPOINT
   async healthCheck() {
-    return apiRequest('/health');
+    return apiRequest('/');  // Now uses /api/ instead of /api/health
   }
 };
 

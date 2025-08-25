@@ -1,164 +1,62 @@
-// Complete Tasks API with Joi Validation
+// api/tasks.js - ALL task-related endpoints consolidated
 import { getTaskRepository } from './data/TaskRepository.js';
 import { setCorsHeaders, handleCorsPrelight } from './middleware/cors.js';
 import { logRequest, logResponse } from './middleware/logger.js';
 import { handleAPIError, APIError } from './middleware/errorHandler.js';
 import Joi from 'joi';
 
-// Joi Validation Schemas
+// All your existing schemas here...
 const taskSchemas = {
-  // Create task schema
   create: Joi.object({
-    title: Joi.string()
-      .trim()
-      .min(1)
-      .max(100)
-      .required()
-      .messages({
-        'string.empty': 'Title cannot be empty',
-        'string.min': 'Title must be at least 1 character',
-        'string.max': 'Title must be 100 characters or less',
-        'any.required': 'Title is required'
-      }),
-    
-    description: Joi.string()
-      .trim()
-      .max(500)
-      .allow('')
-      .optional()
-      .messages({
-        'string.max': 'Description must be 500 characters or less'
-      }),
-    
-    status: Joi.string()
-      .valid('todo', 'in_progress', 'completed')
-      .default('todo')
-      .messages({
-        'any.only': 'Status must be one of: todo, in_progress, completed'
-      }),
-    
-    priority: Joi.string()
-      .valid('low', 'medium', 'high')
-      .default('medium')
-      .messages({
-        'any.only': 'Priority must be one of: low, medium, high'
-      }),
-    
-    dueDate: Joi.date()
-      .iso()
-      .min('now')
-      .allow(null)
-      .optional()
-      .messages({
-        'date.format': 'Due date must be a valid ISO date',
-        'date.min': 'Due date cannot be in the past'
-      }),
-    
-    tags: Joi.array()
-      .items(
-        Joi.string()
-          .trim()
-          .min(1)
-          .max(50)
-          .pattern(/^[a-zA-Z0-9\-_]+$/)
-          .messages({
-            'string.pattern.base': 'Tags can only contain letters, numbers, hyphens, and underscores'
-          })
-      )
-      .max(10)
-      .unique()
-      .default([])
-      .messages({
-        'array.max': 'Maximum 10 tags allowed',
-        'array.unique': 'Tags must be unique'
-      })
+    title: Joi.string().trim().min(1).max(100).required(),
+    description: Joi.string().trim().max(500).allow('').optional(),
+    status: Joi.string().valid('todo', 'in_progress', 'completed').default('todo'),
+    priority: Joi.string().valid('low', 'medium', 'high').default('medium'),
+    dueDate: Joi.date().iso().min('now').allow(null).optional(),
+    tags: Joi.array().items(
+      Joi.string().trim().min(1).max(50).pattern(/^[a-zA-Z0-9\-_]+$/)
+    ).max(10).unique().default([])
   }),
 
-  // Query parameter validation schema
+  update: Joi.object({
+    title: Joi.string().trim().min(1).max(100),
+    description: Joi.string().trim().max(500).allow(''),
+    status: Joi.string().valid('todo', 'in_progress', 'completed'),
+    priority: Joi.string().valid('low', 'medium', 'high'),
+    dueDate: Joi.date().iso().allow(null),
+    tags: Joi.array().items(
+      Joi.string().trim().min(1).max(50).pattern(/^[a-zA-Z0-9\-_]+$/)
+    ).max(10).unique()
+  }).min(1),
+
   filters: Joi.object({
-    status: Joi.string()
-      .valid('todo', 'in_progress', 'completed')
-      .allow('')  // Allow empty string
-      .messages({
-        'any.only': 'Status filter must be one of: todo, in_progress, completed'
-      }),
-    
-    priority: Joi.string()
-      .valid('low', 'medium', 'high')
-      .allow('')  // Allow empty string
-      .messages({
-        'any.only': 'Priority filter must be one of: low, medium, high'
-      }),
-    
-    tags: Joi.string()
-      .allow('')  // Allow empty string
-      .messages({
-        'string.base': 'Tags filter must be a comma-separated string'
-      }),
-    
-    search: Joi.string()
-      .max(200)
-      .allow('')  // Allow empty string
-      .messages({
-        'string.max': 'Search query must be 200 characters or less'
-      }),
-    
-    overdue: Joi.alternatives()
-      .try(
-        Joi.boolean(),
-        Joi.string().valid('true', 'false', ''),  // Allow string versions and empty
-        Joi.valid(null)
-      )
-      .default(false)
-      .messages({
-        'alternatives.match': 'Overdue filter must be true, false, or empty'
-      }),
-    
-    sortBy: Joi.string()
-      .valid('title', 'status', 'priority', 'createdAt', 'updatedAt', 'dueDate')
-      .default('updatedAt')
-      .messages({
-        'any.only': 'Sort field must be one of: title, status, priority, createdAt, updatedAt, dueDate'
-      }),
-    
-    sortOrder: Joi.string()
-      .valid('asc', 'desc')
-      .default('desc')
-      .messages({
-        'any.only': 'Sort order must be asc or desc'
-      }),
-    
-    limit: Joi.alternatives()
-      .try(
-        Joi.number().integer().min(1).max(100),
-        Joi.string().pattern(/^\d+$/).custom((value) => {
-          const num = parseInt(value);
-          if (num < 1 || num > 100) throw new Error('Must be between 1 and 100');
-          return num;
-        })
-      )
-      .default(50)
-      .messages({
-        'alternatives.match': 'Limit must be a number between 1 and 100'
-      }),
-    
-    offset: Joi.alternatives()
-      .try(
-        Joi.number().integer().min(0),
-        Joi.string().pattern(/^\d+$/).custom((value) => {
-          const num = parseInt(value);
-          if (num < 0) throw new Error('Cannot be negative');
-          return num;
-        })
-      )
-      .default(0)
-      .messages({
-        'alternatives.match': 'Offset must be a non-negative number'
-      })
-  }).options({ stripUnknown: true })  // Remove unknown query params
+    status: Joi.string().valid('todo', 'in_progress', 'completed').allow(''),
+    priority: Joi.string().valid('low', 'medium', 'high').allow(''),
+    tags: Joi.string().allow(''),
+    search: Joi.string().max(200).allow(''),
+    overdue: Joi.alternatives().try(
+      Joi.boolean(),
+      Joi.string().valid('true', 'false', ''),
+      Joi.valid(null)
+    ).default(false),
+    sortBy: Joi.string().valid('title', 'status', 'priority', 'createdAt', 'updatedAt', 'dueDate').default('updatedAt'),
+    sortOrder: Joi.string().valid('asc', 'desc').default('desc'),
+    limit: Joi.alternatives().try(
+      Joi.number().integer().min(1).max(100),
+      Joi.string().pattern(/^\d+$/).custom(value => parseInt(value))
+    ).default(50),
+    offset: Joi.alternatives().try(
+      Joi.number().integer().min(0),
+      Joi.string().pattern(/^\d+$/).custom(value => parseInt(value))
+    ).default(0)
+  }).options({ stripUnknown: true }),
+
+  taskId: Joi.object({
+    id: Joi.string().uuid({ version: ['uuidv4'] }).required()
+  })
 };
 
-// Validation middleware functions
+// Validation functions
 function validateCreateTask(req) {
   const { error, value } = taskSchemas.create.validate(req.body, {
     abortEarly: false,
@@ -170,14 +68,35 @@ function validateCreateTask(req) {
     const validationErrors = error.details.map(detail => ({
       field: detail.path.join('.'),
       message: detail.message,
-      value: detail.context?.value,
-      type: detail.type
+      value: detail.context?.value
     }));
 
     throw new APIError('Task validation failed', 400, {
       type: 'validation_error',
-      errors: validationErrors,
-      summary: `${validationErrors.length} validation error${validationErrors.length > 1 ? 's' : ''} found`
+      errors: validationErrors
+    });
+  }
+
+  return value;
+}
+
+function validateUpdateTask(req) {
+  const { error, value } = taskSchemas.update.validate(req.body, {
+    abortEarly: false,
+    stripUnknown: true,
+    convert: true
+  });
+
+  if (error) {
+    const validationErrors = error.details.map(detail => ({
+      field: detail.path.join('.'),
+      message: detail.message,
+      value: detail.context?.value
+    }));
+
+    throw new APIError('Task update validation failed', 400, {
+      type: 'validation_error',
+      errors: validationErrors
     });
   }
 
@@ -188,8 +107,7 @@ function validateTaskFilters(req) {
   const { error, value } = taskSchemas.filters.validate(req.query, {
     abortEarly: false,
     stripUnknown: true,
-    convert: true,
-    allowUnknown: false
+    convert: true
   });
 
   if (error) {
@@ -201,136 +119,81 @@ function validateTaskFilters(req) {
 
     throw new APIError('Invalid query parameters', 400, {
       type: 'validation_error',
-      errors: validationErrors,
-      received: req.query
+      errors: validationErrors
     });
   }
 
-  // Process special fields more robustly
+  // Clean up filters
   if (value.tags && typeof value.tags === 'string') {
     if (value.tags.trim() === '') {
-      delete value.tags;  // Remove empty tags
+      delete value.tags;
     } else {
       value.tags = value.tags.split(',')
         .map(tag => tag.trim().toLowerCase())
         .filter(tag => tag.length > 0);
-      
-      if (value.tags.length === 0) {
-        delete value.tags;
-      }
+      if (value.tags.length === 0) delete value.tags;
     }
   }
 
-  // Convert overdue to proper boolean or remove if empty/false
   if (value.overdue !== undefined) {
     if (typeof value.overdue === 'string') {
       if (value.overdue === 'true') {
         value.overdue = true;
       } else {
-        delete value.overdue;  // Remove false/empty overdue
+        delete value.overdue;
       }
     } else if (value.overdue === false) {
-      delete value.overdue;  // Remove explicit false
+      delete value.overdue;
     }
   }
 
-  // Remove empty string filters
   Object.keys(value).forEach(key => {
-    if (value[key] === '') {
-      delete value[key];
-    }
+    if (value[key] === '') delete value[key];
   });
 
   return value;
 }
 
-// Content-Type validation
-function validateContentType(req) {
-  if (req.method === 'POST' || req.method === 'PUT') {
-    const contentType = req.headers['content-type'] || '';
-    
-    if (!contentType.includes('application/json')) {
-      throw new APIError('Invalid Content-Type', 400, {
-        type: 'content_type_error',
-        received: contentType,
-        expected: 'application/json',
-        message: 'Request body must be JSON with Content-Type: application/json header'
-      });
-    }
-  }
-}
-
-// Request body parsing with error handling
-function parseRequestBody(req) {
-  // Vercel serverless functions automatically parse JSON, but let's be safe
-  if (typeof req.body === 'string') {
-    try {
-      return JSON.parse(req.body);
-    } catch (error) {
-      throw new APIError('Invalid JSON in request body', 400, {
-        type: 'json_parse_error',
-        message: 'Request body contains malformed JSON',
-        details: error.message
-      });
-    }
-  }
-  
-  return req.body || {};
-}
-
-// Main handler function
+// Main handler that routes to different operations
 export default async function handler(req, res) {
   let requestId;
   
   try {
-    // Handle CORS preflight requests
-    if (handleCorsPrelight(req, res)) {
-      return;
-    }
-
-    // Set CORS headers for all responses
+    if (handleCorsPrelight(req, res)) return;
     setCorsHeaders(res, req.headers.origin);
-
-    // Log incoming request and generate request ID
     requestId = logRequest(req);
 
-    // Validate content type for POST requests
-    validateContentType(req);
-
-    // Parse request body for POST requests
-    if (req.method === 'POST') {
-      req.body = parseRequestBody(req);
-    }
-
-    // Get repository instance
     const repository = getTaskRepository();
+    
+    // Parse URL to determine if this is individual task operation
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    const pathParts = url.pathname.split('/').filter(Boolean);
+    
+    // Check if this is /api/tasks/[id] pattern
+    const isIndividualTask = pathParts.length === 3 && pathParts[2] !== 'stats';
+    const taskId = isIndividualTask ? pathParts[2] : null;
 
-    // Route to appropriate handler based on HTTP method
+    // Route based on URL pattern and method
     let statusCode = 200;
     let response;
 
-    switch (req.method) {
-      case 'GET':
-        response = await handleGetTasks(req, repository);
-        break;
-        
-      case 'POST':
-        response = await handleCreateTask(req, repository);
-        statusCode = 201;
-        break;
-        
-      default:
-        throw new APIError(`Method ${req.method} not allowed`, 405, {
-          type: 'method_not_allowed',
-          allowedMethods: ['GET', 'POST'],
-          message: `The ${req.method} method is not supported for this endpoint`
-        });
+    if (url.pathname.endsWith('/stats')) {
+      // GET /api/tasks/stats
+      if (req.method !== 'GET') {
+        throw new APIError(`Method ${req.method} not allowed for stats`, 405);
+      }
+      response = await handleGetStats(repository);
+    } else if (isIndividualTask) {
+      // Individual task operations: /api/tasks/[id]
+      response = await handleIndividualTask(req, taskId, repository);
+      if (req.method === 'POST') statusCode = 201;
+    } else {
+      // Collection operations: /api/tasks
+      response = await handleTaskCollection(req, repository);
+      if (req.method === 'POST') statusCode = 201;
     }
 
-    // Log successful response
     logResponse(req, res, statusCode);
-
-    // Send successful response
     res.status(statusCode).json({
       success: true,
       data: response,
@@ -338,212 +201,158 @@ export default async function handler(req, res) {
         timestamp: new Date().toISOString(),
         requestId,
         method: req.method,
-        endpoint: '/api/tasks'
+        endpoint: url.pathname
       }
     });
 
   } catch (error) {
-    // Log error response
-    if (requestId) {
-      logResponse(req, res, error.statusCode || 500);
-    }
-    
-    // Handle and send error response
+    if (requestId) logResponse(req, res, error.statusCode || 500);
     handleAPIError(res, error, requestId);
   }
 }
 
-// GET /api/tasks - Fetch tasks with filtering, sorting, and pagination
-async function handleGetTasks(req, repository) {
-  try {
-    // Validate and process query parameters
-    const filters = validateTaskFilters(req);
-    
-    console.log(`[${req.requestId}] Fetching tasks with filters:`, filters);
-
-    // Fetch tasks from repository
-    const result = await repository.findAll(filters);
-    
-    // Enhance response with metadata
-    const enhancedResponse = {
-      ...result,
-      filters: {
-        applied: filters,
-        available: {
-          status: ['todo', 'in_progress', 'completed'],
-          priority: ['low', 'medium', 'high'],
-          sortBy: ['title', 'status', 'priority', 'createdAt', 'updatedAt', 'dueDate'],
-          sortOrder: ['asc', 'desc']
-        }
-      },
-      summary: {
-        totalTasks: result.pagination.total,
-        filteredTasks: result.tasks.length,
-        hasFilters: Object.keys(filters).some(key => 
-          filters[key] !== undefined && 
-          filters[key] !== '' && 
-          (Array.isArray(filters[key]) ? filters[key].length > 0 : true)
-        ),
-        currentPage: Math.floor(filters.offset / filters.limit) + 1,
-        totalPages: Math.ceil(result.pagination.total / filters.limit)
-      }
-    };
-
-    console.log(`[${req.requestId}] Successfully fetched ${result.tasks.length} tasks`);
-    
-    return enhancedResponse;
-    
-  } catch (error) {
-    if (error instanceof APIError) {
-      throw error;
-    }
-    
-    console.error(`[${req.requestId}] Error fetching tasks:`, error);
-    throw new APIError('Failed to fetch tasks', 500, {
-      type: 'database_error',
-      message: 'An error occurred while retrieving tasks from the database',
-      originalError: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
-  }
-}
-
-// POST /api/tasks - Create a new task
-async function handleCreateTask(req, repository) {
-  try {
-    // Validate request body against schema
-    const validatedData = validateCreateTask(req);
-    
-    console.log(`[${req.requestId}] Creating task:`, {
-      title: validatedData.title,
-      status: validatedData.status,
-      priority: validatedData.priority,
-      tagCount: validatedData.tags?.length || 0
-    });
-
-    // Additional business logic validation
-    await performBusinessValidation(validatedData, repository);
-    
-    // Create the task
-    const newTask = await repository.create(validatedData);
-    
-    console.log(`[${req.requestId}] Successfully created task with ID: ${newTask.id}`);
-    
-    // Return success response
-    return {
-      task: newTask,
-      message: 'Task created successfully',
-      summary: {
-        id: newTask.id,
-        title: newTask.title,
-        status: newTask.status,
-        priority: newTask.priority,
-        createdAt: newTask.createdAt
-      }
-    };
-    
-  } catch (error) {
-    if (error instanceof APIError) {
-      throw error;
-    }
-    
-    console.error(`[${req.requestId}] Error creating task:`, error);
-    throw new APIError('Failed to create task', 500, {
-      type: 'database_error',
-      message: 'An error occurred while saving the task to the database',
-      originalError: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
-  }
-}
-
-// Additional business logic validation
-async function performBusinessValidation(taskData, repository) {
-  // Example: Check for duplicate titles (if that's a business requirement)
-  if (process.env.PREVENT_DUPLICATE_TITLES === 'true') {
-    try {
-      const existingTasks = await repository.findAll({ 
-        search: taskData.title,
-        limit: 1 
-      });
-      
-      const duplicateTitle = existingTasks.tasks.find(
-        task => task.title.toLowerCase() === taskData.title.toLowerCase()
-      );
-      
-      if (duplicateTitle) {
-        throw new APIError('Duplicate task title', 409, {
-          type: 'business_rule_violation',
-          message: 'A task with this title already exists',
-          conflictingTask: {
-            id: duplicateTitle.id,
-            title: duplicateTitle.title,
-            createdAt: duplicateTitle.createdAt
+// Handler for task collection operations
+async function handleTaskCollection(req, repository) {
+  switch (req.method) {
+    case 'GET':
+      const filters = validateTaskFilters(req);
+      const result = await repository.findAll(filters);
+      return {
+        ...result,
+        filters: {
+          applied: filters,
+          available: {
+            status: ['todo', 'in_progress', 'completed'],
+            priority: ['low', 'medium', 'high'],
+            sortBy: ['title', 'status', 'priority', 'createdAt', 'updatedAt', 'dueDate'],
+            sortOrder: ['asc', 'desc']
           }
+        }
+      };
+
+    case 'POST':
+      const validatedData = validateCreateTask(req);
+      const newTask = await repository.create(validatedData);
+      return {
+        task: newTask,
+        message: 'Task created successfully'
+      };
+
+    default:
+      throw new APIError(`Method ${req.method} not allowed`, 405, {
+        allowedMethods: ['GET', 'POST']
+      });
+  }
+}
+
+// Handler for individual task operations
+async function handleIndividualTask(req, taskId, repository) {
+  // Validate task ID format
+  const { error } = taskSchemas.taskId.validate({ id: taskId });
+  if (error) {
+    throw new APIError('Invalid task ID format', 400, {
+      type: 'validation_error',
+      errors: [{ field: 'id', message: 'Task ID must be a valid UUID' }]
+    });
+  }
+
+  switch (req.method) {
+    case 'GET':
+      const task = await repository.findById(taskId);
+      if (!task) {
+        throw new APIError('Task not found', 404, {
+          type: 'resource_not_found',
+          resource: 'task',
+          resourceId: taskId
         });
       }
-    } catch (error) {
-      if (error instanceof APIError) {
-        throw error;
-      }
-      // If we can't check for duplicates, log it but don't fail the request
-      console.warn('Could not check for duplicate titles:', error.message);
-    }
-  }
+      return { task };
 
-  // Example: Validate due date is reasonable (not too far in the future)
-  if (taskData.dueDate) {
-    const dueDate = new Date(taskData.dueDate);
-    const maxFutureDate = new Date();
-    maxFutureDate.setFullYear(maxFutureDate.getFullYear() + 5); // 5 years from now
-    
-    if (dueDate > maxFutureDate) {
-      throw new APIError('Due date too far in future', 400, {
-        type: 'business_rule_violation',
-        message: 'Due date cannot be more than 5 years in the future',
-        maxAllowedDate: maxFutureDate.toISOString()
-      });
-    }
-  }
-
-  // Example: Limit high priority tasks (business rule)
-  if (taskData.priority === 'high') {
-    try {
-      const highPriorityTasks = await repository.findAll({ 
-        priority: 'high',
-        status: 'todo',
-        limit: 100 
-      });
-      
-      if (highPriorityTasks.tasks.length >= 10) {
-        console.warn(`High priority task limit approaching: ${highPriorityTasks.tasks.length}/10`);
-        // Could throw an error here if you want to enforce the limit
+    case 'PUT':
+      const validatedUpdates = validateUpdateTask(req);
+      const updatedTask = await repository.update(taskId, validatedUpdates);
+      if (!updatedTask) {
+        throw new APIError('Task not found', 404, {
+          type: 'resource_not_found',
+          resource: 'task',
+          resourceId: taskId
+        });
       }
-    } catch (error) {
-      console.warn('Could not check high priority task limit:', error.message);
-    }
+      return {
+        task: updatedTask,
+        message: 'Task updated successfully'
+      };
+
+    case 'DELETE':
+      const deletedTask = await repository.delete(taskId);
+      if (!deletedTask) {
+        throw new APIError('Task not found', 404, {
+          type: 'resource_not_found',
+          resource: 'task',
+          resourceId: taskId
+        });
+      }
+      return {
+        task: deletedTask,
+        message: 'Task deleted successfully'
+      };
+
+    default:
+      throw new APIError(`Method ${req.method} not allowed`, 405, {
+        allowedMethods: ['GET', 'PUT', 'DELETE']
+      });
   }
 }
 
-// Health check for this specific endpoint
-export async function healthCheck() {
-  try {
-    const repository = getTaskRepository();
-    const stats = await repository.getStats();
-    
-    return {
-      status: 'healthy',
-      endpoint: '/api/tasks',
-      database: {
-        connected: true,
-        taskCount: stats.total
-      },
-      timestamp: new Date().toISOString()
-    };
-  } catch (error) {
-    return {
-      status: 'unhealthy',
-      endpoint: '/api/tasks',
-      error: error.message,
-      timestamp: new Date().toISOString()
-    };
+// Handler for stats endpoint
+async function handleGetStats(repository) {
+  const stats = await repository.getStats();
+  
+  const enhancedStats = {
+    ...stats,
+    completion: {
+      rate: stats.total > 0 ? Math.round((stats.byStatus.completed / stats.total) * 100) : 0,
+      total: stats.byStatus.completed,
+      remaining: stats.byStatus.todo + stats.byStatus.in_progress
+    },
+    productivity: {
+      completedToday: stats.completedToday,
+      overdueItems: stats.overdue,
+      inProgressItems: stats.byStatus.in_progress
+    }
+  };
+
+  return {
+    statistics: enhancedStats,
+    summary: generateSummary(enhancedStats)
+  };
+}
+
+function generateSummary(stats) {
+  if (stats.total === 0) {
+    return 'No tasks yet. Create your first task to get started!';
   }
+  
+  const messages = [];
+  const completionRate = stats.completion.rate;
+  
+  if (completionRate >= 80) {
+    messages.push('Great job! You\'re doing excellent work.');
+  } else if (completionRate >= 60) {
+    messages.push('Good progress! Keep up the momentum.');
+  } else if (completionRate >= 40) {
+    messages.push('You\'re making progress. Stay focused!');
+  } else {
+    messages.push('Time to tackle some tasks!');
+  }
+  
+  if (stats.productivity.overdueItems > 0) {
+    messages.push(`You have ${stats.productivity.overdueItems} overdue task${stats.productivity.overdueItems > 1 ? 's' : ''}.`);
+  }
+  
+  if (stats.productivity.completedToday > 0) {
+    messages.push(`You completed ${stats.productivity.completedToday} task${stats.productivity.completedToday > 1 ? 's' : ''} today!`);
+  }
+  
+  return messages.join(' ');
 }
