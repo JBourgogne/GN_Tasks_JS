@@ -1,5 +1,4 @@
-// API utility functions for frontend
-
+// src/utils/api.js - Updated API utility with better error handling
 
 // Base API configuration
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
@@ -14,7 +13,7 @@ export class APIError extends Error {
   }
 }
 
-// Generic API request function
+// Generic API request function with improved error handling
 async function apiRequest(endpoint, options = {}) {
   const url = `${API_BASE}${endpoint}`;
   
@@ -27,6 +26,8 @@ async function apiRequest(endpoint, options = {}) {
   };
 
   try {
+    console.log(`API Request: ${config.method || 'GET'} ${url}`);
+    
     const response = await fetch(url, config);
     
     // Handle different response types
@@ -36,21 +37,33 @@ async function apiRequest(endpoint, options = {}) {
     if (contentType && contentType.includes('application/json')) {
       data = await response.json();
     } else {
-      data = await response.text();
+      // If we get HTML instead of JSON, it's likely a 404 page
+      const text = await response.text();
+      if (text.includes('<html>') || text.includes('<!DOCTYPE')) {
+        throw new APIError('API endpoint not found - got HTML page instead of JSON', response.status || 404);
+      }
+      data = text;
     }
 
     if (!response.ok) {
       // Handle API error responses
-      const message = data?.error?.message || data?.message || `HTTP ${response.status}`;
+      const message = data?.error?.message || data?.message || `HTTP ${response.status}: ${response.statusText}`;
       const details = data?.error?.details || data?.details || null;
       
       // Log the full error for debugging
-      console.error('API Error Response:', data);
+      console.error('API Error Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        url,
+        data
+      });
       
       throw new APIError(message, response.status, details);
     }
 
+    console.log(`API Success: ${config.method || 'GET'} ${url}`, data.success ? '✅' : '⚠️');
     return data;
+    
   } catch (error) {
     if (error instanceof APIError) {
       throw error;
@@ -58,9 +71,12 @@ async function apiRequest(endpoint, options = {}) {
 
     // Handle network errors
     if (error.name === 'TypeError' && error.message.includes('fetch')) {
-      throw new APIError('Network error - please check your connection', 0);
+      console.error('Network error:', error);
+      throw new APIError('Network error - please check your connection and try again', 0);
     }
 
+    // Handle other errors
+    console.error('Unexpected API error:', error);
     throw new APIError(error.message || 'An unexpected error occurred', 0);
   }
 }
@@ -84,8 +100,13 @@ function cleanQueryParams(params) {
       if (filteredArray.length > 0) {
         cleaned[key] = filteredArray.join(',');
       }
+    } else if (typeof value === 'boolean') {
+      // Only include true boolean values
+      if (value === true) {
+        cleaned[key] = 'true';
+      }
     } else {
-      cleaned[key] = value;
+      cleaned[key] = String(value);
     }
   });
   
@@ -173,14 +194,14 @@ export const tasksAPI = {
     return apiRequest(`/tasks/${id}`, { method: 'DELETE' });
   },
 
-  // Get task statistics - UPDATED ENDPOINT
+  // Get task statistics
   async getStats() {
     return apiRequest('/tasks/stats');
   },
 
-  // Health check - UPDATED ENDPOINT
+  // Health check
   async healthCheck() {
-    return apiRequest('/');  // Now uses /api/ instead of /api/health
+    return apiRequest('/');
   }
 };
 
@@ -212,7 +233,6 @@ export const apiHelpers = {
     
     const overdue = searchParams.get('overdue');
     if (overdue === 'true') filters.overdue = true;
-    // Note: we don't set overdue = false explicitly, we just omit it
 
     const limit = searchParams.get('limit');
     if (limit && !isNaN(limit)) filters.limit = Math.min(Math.max(parseInt(limit), 1), 100);
@@ -272,6 +292,7 @@ export const apiHelpers = {
         }
         
         // Wait before retrying with exponential backoff
+        console.log(`API request failed, retrying in ${delay * attempt}ms (attempt ${attempt}/${maxRetries})`);
         await new Promise(resolve => setTimeout(resolve, delay * attempt));
       }
     }
