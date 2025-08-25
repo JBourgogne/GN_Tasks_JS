@@ -4,7 +4,7 @@ A full-stack task management application built with modern web development pract
 
 ## 🚀 Live Demo
 
-**Frontend:** [https://gn-tasks-js.vercel.app/](https://gn-tasks-js.vercel.app/  
+**Frontend:** [https://gn-tasks-js.vercel.app/](https://gn-tasks-js.vercel.app/)  
 **API Health Check:** [https://gn-tasks-js.vercel.app/api](https://gn-tasks-js.vercel.app/api)
 
 ## ✨ Features
