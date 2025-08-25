@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import TaskList from './components/TaskList/TaskList.jsx';
 import TaskForm from './components/TaskForm/TaskForm.jsx';
+import FilterBar from './components/FilterBar/FilterBar.jsx';
+import Dashboard from './components/Dashboard/Dashboard.jsx';
 import { TaskProvider } from './context/TaskContext.jsx';
 import { useTasks } from './hooks/useTasks.js';
 import './App.css';
@@ -13,32 +15,26 @@ function AppContent() {
     loading,
     error,
     selectedTask,
-    modal,
+    filters: contextFilters,
     createTask,
     updateTask,
     deleteTask,
     loadTasks,
     loadStats,
     updateFilters,
+    updateSearch,
     selectTask,
-    openModal,
-    closeModal,
     clearError
   } = useTasks();
 
   // Local state for UI
   const [backendStatus, setBackendStatus] = useState('checking...');
-  const [filters, setFilters] = useState({
-    status: '',
-    priority: '',
-    search: '',
-    tags: []
-  });
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [dashboardMode, setDashboardMode] = useState('full'); // 'full', 'compact', 'hidden'
 
   // Initialize app - check backend and load data
   useEffect(() => {
@@ -66,23 +62,37 @@ function AppContent() {
     initializeApp();
   }, [loadTasks, loadStats]);
 
-  // Handle filter changes
-  const handleFilterChange = async (newFilters) => {
-    setFilters(prev => ({ ...prev, ...newFilters }));
+  // Handle filter changes from FilterBar
+  const handleFiltersChange = useCallback(async (newFilters) => {
     await updateFilters(newFilters);
-  };
+  }, [updateFilters]);
 
-  // Handle search with debouncing
-  const [searchTimeout, setSearchTimeout] = useState(null);
-  const handleSearchChange = (searchTerm) => {
-    setFilters(prev => ({ ...prev, search: searchTerm }));
-    
-    // Debounce search
-    if (searchTimeout) clearTimeout(searchTimeout);
-    setSearchTimeout(setTimeout(() => {
-      handleFilterChange({ search: searchTerm });
-    }, 500));
-  };
+  // Handle search with debouncing (handled by FilterBar)
+  const handleSearchChange = useCallback(async (searchTerm) => {
+    await updateSearch(searchTerm);
+  }, [updateSearch]);
+
+  // Clear all filters
+  const handleClearAllFilters = useCallback(async () => {
+    const clearedFilters = {
+      status: '',
+      priority: '',
+      tags: [],
+      search: '',
+      overdue: false,
+      sortBy: 'updatedAt',
+      sortOrder: 'desc'
+    };
+    await updateFilters(clearedFilters);
+  }, [updateFilters]);
+
+  // Dashboard filter clicks
+  const handleDashboardFilterChange = useCallback(async (filterChange) => {
+    await updateFilters({
+      ...contextFilters,
+      ...filterChange
+    });
+  }, [contextFilters, updateFilters]);
 
   // Task form handlers
   const handleCreateTask = () => {
@@ -158,24 +168,68 @@ function AppContent() {
     setDeleteConfirm(null);
   };
 
-  // Calculate filtered task counts for display
-  const getFilteredTaskCount = (status) => {
-    return tasks.filter(task => task.status === status).length;
+  // Refresh all data
+  const handleRefreshData = async () => {
+    await Promise.all([loadTasks(), loadStats()]);
+  };
+
+  // Get available tags for FilterBar
+  const getAvailableTags = () => {
+    if (!stats?.tags?.popular) return [];
+    return stats.tags.popular;
   };
 
   return (
     <div className="App">
       {/* Header */}
       <header className="App-header">
-        <h1>🚀 Task Management App</h1>
-        <p>Full-stack React + Express application with modern task management</p>
+        <div className="header-content">
+          <div className="header-main">
+            <h1>🚀 Task Management App</h1>
+            <p>Full-stack React + Express application with modern task management</p>
+          </div>
+          
+          <div className="header-controls">
+            <button 
+              className="btn btn-primary"
+              onClick={handleCreateTask}
+              disabled={loading}
+            >
+              ✨ Create New Task
+            </button>
+            
+            <button
+              className="btn btn-secondary"
+              onClick={handleRefreshData}
+              disabled={loading}
+              title="Refresh all data"
+            >
+              🔄 Refresh
+            </button>
+            
+            <div className="dashboard-toggle">
+              <label>Dashboard: </label>
+              <select 
+                value={dashboardMode} 
+                onChange={(e) => setDashboardMode(e.target.value)}
+                className="dashboard-select"
+              >
+                <option value="full">Full</option>
+                <option value="compact">Compact</option>
+                <option value="hidden">Hidden</option>
+              </select>
+            </div>
+          </div>
+        </div>
         
         {/* System Status */}
         <div className="status-section">
-          <h3>System Status</h3>
-          <p>Frontend: ✅ React + Vite running</p>
-          <p>Backend: {backendStatus}</p>
-          <p>Environment: {import.meta.env.MODE}</p>
+          <div className="status-info">
+            <span>Frontend: ✅ React + Vite</span>
+            <span>Backend: {backendStatus}</span>
+            <span>Environment: {import.meta.env.MODE}</span>
+            {stats && <span>Tasks: {stats.total} total</span>}
+          </div>
         </div>
 
         {/* Global Error Display */}
@@ -192,126 +246,66 @@ function AppContent() {
             <p>⏳ Loading tasks...</p>
           </div>
         )}
-
-        {/* Statistics Dashboard */}
-        {stats && (
-          <div className="stats-section">
-            <h3>📊 Task Overview</h3>
-            <div className="stats-grid">
-              <div className="stat-item">
-                <span className="stat-number">{stats.total}</span>
-                <span className="stat-label">Total Tasks</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-number">{stats.byStatus?.todo || 0}</span>
-                <span className="stat-label">To Do</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-number">{stats.byStatus?.in_progress || 0}</span>
-                <span className="stat-label">In Progress</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-number">{stats.byStatus?.completed || 0}</span>
-                <span className="stat-label">Completed</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-number">{stats.overdue || 0}</span>
-                <span className="stat-label">Overdue</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-number">{stats.completedToday || 0}</span>
-                <span className="stat-label">Done Today</span>
-              </div>
-            </div>
-            <div className="completion-rate">
-              <span>Completion Rate: {stats.completion?.rate || 0}%</span>
-            </div>
-            {stats.productivity?.summary && (
-              <div className="productivity-summary">
-                <p>{stats.productivity.summary}</p>
-              </div>
-            )}
-          </div>
-        )}
       </header>
+
+      {/* Dashboard */}
+      {dashboardMode !== 'hidden' && (
+        <Dashboard
+          stats={stats}
+          tasks={tasks}
+          loading={loading && !stats}
+          onFilterChange={handleDashboardFilterChange}
+          compactMode={dashboardMode === 'compact'}
+        />
+      )}
 
       {/* Main Content */}
       <main className="App-main">
-        {/* Filter and Search Section */}
-        <div className="controls-section">
-          <div className="section-header">
-            <h3>📝 Task Management</h3>
-            <button 
-              className="btn btn-primary"
-              onClick={handleCreateTask}
-              disabled={loading}
-            >
-              ✨ Create New Task
-            </button>
-          </div>
-
-          {/* Search and Filters */}
-          <div className="filters-container">
-            <div className="search-container">
-              <input
-                type="text"
-                placeholder="🔍 Search tasks..."
-                value={filters.search}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                className="search-input"
-              />
-            </div>
-
-            <div className="filter-controls">
-              <select
-                value={filters.status}
-                onChange={(e) => handleFilterChange({ status: e.target.value })}
-                className="filter-select"
-              >
-                <option value="">All Status</option>
-                <option value="todo">📋 To Do</option>
-                <option value="in_progress">🔄 In Progress</option>
-                <option value="completed">✅ Completed</option>
-              </select>
-
-              <select
-                value={filters.priority}
-                onChange={(e) => handleFilterChange({ priority: e.target.value })}
-                className="filter-select"
-              >
-                <option value="">All Priorities</option>
-                <option value="high">🔴 High</option>
-                <option value="medium">🟡 Medium</option>
-                <option value="low">🟢 Low</option>
-              </select>
-
-              <button
-                onClick={() => {
-                  setFilters({ status: '', priority: '', search: '', tags: [] });
-                  handleFilterChange({ status: '', priority: '', search: '', tags: [] });
-                }}
-                className="btn btn-secondary"
-                disabled={!filters.status && !filters.priority && !filters.search}
-              >
-                Clear Filters
-              </button>
-
-              <button
-                onClick={() => {
-                  loadTasks();
-                  loadStats();
-                }}
-                className="btn btn-secondary"
-                disabled={loading}
-              >
-                🔄 Refresh
-              </button>
-            </div>
-          </div>
-        </div>
+        {/* Filter Bar */}
+        <FilterBar
+          filters={contextFilters}
+          onFiltersChange={handleFiltersChange}
+          taskStats={stats}
+          availableTags={getAvailableTags()}
+          loading={loading}
+          onClearFilters={handleClearAllFilters}
+        />
 
         {/* Task List */}
         <div className="tasks-section">
+          <div className="tasks-header">
+            <h3>
+              📝 Tasks 
+              {contextFilters?.search && ` - Search: "${contextFilters.search}"`}
+              {contextFilters?.status && ` - Status: ${contextFilters.status}`}
+              {contextFilters?.priority && ` - Priority: ${contextFilters.priority}`}
+              {contextFilters?.overdue && ` - Overdue Only`}
+            </h3>
+            
+            {/* Active Filters Summary */}
+            {(contextFilters?.search || contextFilters?.status || contextFilters?.priority || 
+              contextFilters?.tags?.length > 0 || contextFilters?.overdue) && (
+              <div className="active-filters-summary">
+                <span className="filters-label">Active filters:</span>
+                {contextFilters.search && (
+                  <span className="filter-tag">Search: "{contextFilters.search}"</span>
+                )}
+                {contextFilters.status && (
+                  <span className="filter-tag">Status: {contextFilters.status}</span>
+                )}
+                {contextFilters.priority && (
+                  <span className="filter-tag">Priority: {contextFilters.priority}</span>
+                )}
+                {contextFilters.tags?.map(tag => (
+                  <span key={tag} className="filter-tag">#{tag}</span>
+                ))}
+                {contextFilters.overdue && (
+                  <span className="filter-tag">Overdue</span>
+                )}
+              </div>
+            )}
+          </div>
+          
           <TaskList
             tasks={tasks}
             loading={loading && tasks.length === 0} // Only show loading for initial load
@@ -322,7 +316,7 @@ function AppContent() {
             onTaskSelect={handleTaskSelect}
             selectedTaskId={selectedTask?.id}
             emptyStateMessage={
-              filters.search || filters.status || filters.priority 
+              contextFilters?.search || contextFilters?.status || contextFilters?.priority || contextFilters?.overdue
                 ? "No tasks match your current filters" 
                 : "No tasks yet. Create your first task to get started!"
             }
@@ -381,7 +375,7 @@ function AppContent() {
         </div>
       )}
 
-      {/* Development Info Footer */}
+      {/* Development Footer */}
       <footer className="app-footer">
         <div className="development-info">
           <h3>🔧 Development Status</h3>
@@ -393,6 +387,14 @@ function AppContent() {
             <div className="status-item">
               <span className="status-icon">✅</span>
               <span>React Components (TaskList, TaskForm, TaskItem)</span>
+            </div>
+            <div className="status-item">
+              <span className="status-icon">✅</span>
+              <span>Advanced FilterBar with Search</span>
+            </div>
+            <div className="status-item">
+              <span className="status-icon">✅</span>
+              <span>Interactive Dashboard & Statistics</span>
             </div>
             <div className="status-item">
               <span className="status-icon">✅</span>
@@ -414,15 +416,17 @@ function AppContent() {
         </div>
 
         <div className="tech-stack">
-          <h3>⚡ Tech Stack</h3>
+          <h3>⚡ Tech Stack Completed</h3>
           <ul>
             <li>⚛️ React 18 with Hooks</li>
-            <li>🎯 Context API</li>
+            <li>🎯 Context API + Custom Hooks</li>
             <li>⚡ Vite Build Tool</li>
             <li>🔥 Vercel Serverless Functions</li>
             <li>🗄️ TaskRepository Pattern</li>
-            <li>📱 Responsive CSS</li>
-            <li>🎨 Modern UI/UX</li>
+            <li>📊 Interactive Dashboard</li>
+            <li>🔍 Advanced Filtering & Search</li>
+            <li>📱 Fully Responsive Design</li>
+            <li>🎨 Modern UI/UX with Animations</li>
           </ul>
         </div>
       </footer>
