@@ -1,79 +1,137 @@
-// api/tasks.js - ALL task-related endpoints consolidated
+// Tasks Unified for Vercel Hobby Plan Limit
 import { getTaskRepository } from './data/TaskRepository.js';
 import { setCorsHeaders, handleCorsPrelight } from './middleware/cors.js';
 import { logRequest, logResponse } from './middleware/logger.js';
 import { handleAPIError, APIError } from './middleware/errorHandler.js';
 import Joi from 'joi';
 
-// All your existing schemas here...
+// All schemas (same as before)
 const taskSchemas = {
   create: Joi.object({
-    title: Joi.string().trim().min(1).max(100).required(),
-    description: Joi.string().trim().max(500).allow('').optional(),
-    status: Joi.string().valid('todo', 'in_progress', 'completed').default('todo'),
-    priority: Joi.string().valid('low', 'medium', 'high').default('medium'),
-    dueDate: Joi.date().iso().min('now').allow(null).optional(),
+    title: Joi.string().trim().min(1).max(100).required().messages({
+      'string.empty': 'Title cannot be empty',
+      'string.min': 'Title must be at least 1 character',
+      'string.max': 'Title must be 100 characters or less',
+      'any.required': 'Title is required'
+    }),
+    description: Joi.string().trim().max(500).allow('').optional().messages({
+      'string.max': 'Description must be 500 characters or less'
+    }),
+    status: Joi.string().valid('todo', 'in_progress', 'completed').default('todo').messages({
+      'any.only': 'Status must be one of: todo, in_progress, completed'
+    }),
+    priority: Joi.string().valid('low', 'medium', 'high').default('medium').messages({
+      'any.only': 'Priority must be one of: low, medium, high'
+    }),
+    dueDate: Joi.date().iso().min('now').allow(null).optional().messages({
+      'date.format': 'Due date must be a valid ISO date',
+      'date.min': 'Due date cannot be in the past'
+    }),
     tags: Joi.array().items(
-      Joi.string().trim().min(1).max(50).pattern(/^[a-zA-Z0-9\-_]+$/)
-    ).max(10).unique().default([])
+      Joi.string().trim().min(1).max(50).pattern(/^[a-zA-Z0-9\-_]+$/).messages({
+        'string.pattern.base': 'Tags can only contain letters, numbers, hyphens, and underscores'
+      })
+    ).max(10).unique().default([]).messages({
+      'array.max': 'Maximum 10 tags allowed',
+      'array.unique': 'Tags must be unique'
+    })
   }),
 
   update: Joi.object({
-    title: Joi.string().trim().min(1).max(100),
-    description: Joi.string().trim().max(500).allow(''),
-    status: Joi.string().valid('todo', 'in_progress', 'completed'),
-    priority: Joi.string().valid('low', 'medium', 'high'),
-    dueDate: Joi.date().iso().allow(null),
+    title: Joi.string().trim().min(1).max(100).messages({
+      'string.empty': 'Title cannot be empty',
+      'string.min': 'Title must be at least 1 character',
+      'string.max': 'Title must be 100 characters or less'
+    }),
+    description: Joi.string().trim().max(500).allow('').messages({
+      'string.max': 'Description must be 500 characters or less'
+    }),
+    status: Joi.string().valid('todo', 'in_progress', 'completed').messages({
+      'any.only': 'Status must be one of: todo, in_progress, completed'
+    }),
+    priority: Joi.string().valid('low', 'medium', 'high').messages({
+      'any.only': 'Priority must be one of: low, medium, high'
+    }),
+    dueDate: Joi.date().iso().allow(null).messages({
+      'date.format': 'Due date must be a valid ISO date'
+    }),
     tags: Joi.array().items(
       Joi.string().trim().min(1).max(50).pattern(/^[a-zA-Z0-9\-_]+$/)
-    ).max(10).unique()
-  }).min(1),
+    ).max(10).unique().messages({
+      'array.max': 'Maximum 10 tags allowed',
+      'array.unique': 'Tags must be unique'
+    })
+  }).min(1).messages({
+    'object.min': 'At least one field must be provided for update'
+  }),
 
   filters: Joi.object({
-    status: Joi.string().valid('todo', 'in_progress', 'completed').allow(''),
-    priority: Joi.string().valid('low', 'medium', 'high').allow(''),
-    tags: Joi.string().allow(''),
-    search: Joi.string().max(200).allow(''),
+    status: Joi.string().valid('todo', 'in_progress', 'completed').allow('').messages({
+      'any.only': 'Status filter must be one of: todo, in_progress, completed'
+    }),
+    priority: Joi.string().valid('low', 'medium', 'high').allow('').messages({
+      'any.only': 'Priority filter must be one of: low, medium, high'
+    }),
+    tags: Joi.string().allow('').messages({
+      'string.base': 'Tags filter must be a comma-separated string'
+    }),
+    search: Joi.string().max(200).allow('').messages({
+      'string.max': 'Search query must be 200 characters or less'
+    }),
     overdue: Joi.alternatives().try(
       Joi.boolean(),
       Joi.string().valid('true', 'false', ''),
       Joi.valid(null)
-    ).default(false),
-    sortBy: Joi.string().valid('title', 'status', 'priority', 'createdAt', 'updatedAt', 'dueDate').default('updatedAt'),
-    sortOrder: Joi.string().valid('asc', 'desc').default('desc'),
+    ).default(false).messages({
+      'alternatives.match': 'Overdue filter must be true, false, or empty'
+    }),
+    sortBy: Joi.string().valid('title', 'status', 'priority', 'createdAt', 'updatedAt', 'dueDate').default('updatedAt').messages({
+      'any.only': 'Sort field must be one of: title, status, priority, createdAt, updatedAt, dueDate'
+    }),
+    sortOrder: Joi.string().valid('asc', 'desc').default('desc').messages({
+      'any.only': 'Sort order must be asc or desc'
+    }),
     limit: Joi.alternatives().try(
       Joi.number().integer().min(1).max(100),
-      Joi.string().pattern(/^\d+$/).custom(value => parseInt(value))
-    ).default(50),
+      Joi.string().pattern(/^\d+$/).custom(value => {
+        const num = parseInt(value);
+        if (num < 1 || num > 100) throw new Error('Must be between 1 and 100');
+        return num;
+      })
+    ).default(50).messages({
+      'alternatives.match': 'Limit must be a number between 1 and 100'
+    }),
     offset: Joi.alternatives().try(
       Joi.number().integer().min(0),
-      Joi.string().pattern(/^\d+$/).custom(value => parseInt(value))
-    ).default(0)
-  }).options({ stripUnknown: true }),
-
-  taskId: Joi.object({
-    id: Joi.string().uuid({ version: ['uuidv4'] }).required()
-  })
+      Joi.string().pattern(/^\d+$/).custom(value => {
+        const num = parseInt(value);
+        if (num < 0) throw new Error('Cannot be negative');
+        return num;
+      })
+    ).default(0).messages({
+      'alternatives.match': 'Offset must be a non-negative number'
+    })
+  }).options({ stripUnknown: true })
 };
 
-// Validation functions
+// Validation functions (same as before)
 function validateCreateTask(req) {
   const { error, value } = taskSchemas.create.validate(req.body, {
-    abortEarly: false,
-    stripUnknown: true,
-    convert: true
+    abortEarly: false, stripUnknown: true, convert: true
   });
 
   if (error) {
     const validationErrors = error.details.map(detail => ({
       field: detail.path.join('.'),
       message: detail.message,
-      value: detail.context?.value
+      value: detail.context?.value,
+      type: detail.type
     }));
 
     throw new APIError('Task validation failed', 400, {
       type: 'validation_error',
-      errors: validationErrors
+      errors: validationErrors,
+      summary: `${validationErrors.length} validation error${validationErrors.length > 1 ? 's' : ''} found`
     });
   }
 
@@ -82,21 +140,21 @@ function validateCreateTask(req) {
 
 function validateUpdateTask(req) {
   const { error, value } = taskSchemas.update.validate(req.body, {
-    abortEarly: false,
-    stripUnknown: true,
-    convert: true
+    abortEarly: false, stripUnknown: true, convert: true
   });
 
   if (error) {
     const validationErrors = error.details.map(detail => ({
       field: detail.path.join('.'),
       message: detail.message,
-      value: detail.context?.value
+      value: detail.context?.value,
+      type: detail.type
     }));
 
     throw new APIError('Task update validation failed', 400, {
       type: 'validation_error',
-      errors: validationErrors
+      errors: validationErrors,
+      summary: `${validationErrors.length} validation error${validationErrors.length > 1 ? 's' : ''} found`
     });
   }
 
@@ -105,9 +163,7 @@ function validateUpdateTask(req) {
 
 function validateTaskFilters(req) {
   const { error, value } = taskSchemas.filters.validate(req.query, {
-    abortEarly: false,
-    stripUnknown: true,
-    convert: true
+    abortEarly: false, stripUnknown: true, convert: true, allowUnknown: false
   });
 
   if (error) {
@@ -119,11 +175,12 @@ function validateTaskFilters(req) {
 
     throw new APIError('Invalid query parameters', 400, {
       type: 'validation_error',
-      errors: validationErrors
+      errors: validationErrors,
+      received: req.query
     });
   }
 
-  // Clean up filters
+  // Process tags
   if (value.tags && typeof value.tags === 'string') {
     if (value.tags.trim() === '') {
       delete value.tags;
@@ -131,10 +188,13 @@ function validateTaskFilters(req) {
       value.tags = value.tags.split(',')
         .map(tag => tag.trim().toLowerCase())
         .filter(tag => tag.length > 0);
-      if (value.tags.length === 0) delete value.tags;
+      if (value.tags.length === 0) {
+        delete value.tags;
+      }
     }
   }
 
+  // Process overdue
   if (value.overdue !== undefined) {
     if (typeof value.overdue === 'string') {
       if (value.overdue === 'true') {
@@ -147,14 +207,50 @@ function validateTaskFilters(req) {
     }
   }
 
+  // Remove empty string filters
   Object.keys(value).forEach(key => {
-    if (value[key] === '') delete value[key];
+    if (value[key] === '') {
+      delete value[key];
+    }
   });
 
   return value;
 }
 
-// Main handler that routes to different operations
+// Content-Type validation
+function validateContentType(req) {
+  if (req.method === 'POST' || req.method === 'PUT') {
+    const contentType = req.headers['content-type'] || '';
+    
+    if (!contentType.includes('application/json')) {
+      throw new APIError('Invalid Content-Type', 400, {
+        type: 'content_type_error',
+        received: contentType,
+        expected: 'application/json',
+        message: 'Request body must be JSON with Content-Type: application/json header'
+      });
+    }
+  }
+}
+
+// Request body parsing
+function parseRequestBody(req) {
+  if (typeof req.body === 'string') {
+    try {
+      return JSON.parse(req.body);
+    } catch (error) {
+      throw new APIError('Invalid JSON in request body', 400, {
+        type: 'json_parse_error',
+        message: 'Request body contains malformed JSON',
+        details: error.message
+      });
+    }
+  }
+  
+  return req.body || {};
+}
+
+// MAIN HANDLER - FIXED ROUTING LOGIC
 export default async function handler(req, res) {
   let requestId;
   
@@ -163,34 +259,66 @@ export default async function handler(req, res) {
     setCorsHeaders(res, req.headers.origin);
     requestId = logRequest(req);
 
+    // Validate content type for POST/PUT requests
+    validateContentType(req);
+
+    // Parse request body for POST/PUT requests
+    if (req.method === 'POST' || req.method === 'PUT') {
+      req.body = parseRequestBody(req);
+    }
+
     const repository = getTaskRepository();
     
-    // Parse URL to determine if this is individual task operation
+    // FIXED: Better URL parsing to handle the routing correctly
     const url = new URL(req.url, `http://${req.headers.host}`);
-    const pathParts = url.pathname.split('/').filter(Boolean);
+    const pathname = url.pathname;
+    const pathParts = pathname.split('/').filter(Boolean);
     
-    // Check if this is /api/tasks/[id] pattern
-    const isIndividualTask = pathParts.length === 3 && pathParts[2] !== 'stats';
-    const taskId = isIndividualTask ? pathParts[2] : null;
-
-    // Route based on URL pattern and method
+    console.log('Request pathname:', pathname);
+    console.log('Path parts:', pathParts);
+    
     let statusCode = 200;
     let response;
 
-    if (url.pathname.endsWith('/stats')) {
-      // GET /api/tasks/stats
+    // Route based on exact pathname matching
+    if (pathname === '/api/tasks/stats') {
+      // Handle /api/tasks/stats specifically
       if (req.method !== 'GET') {
-        throw new APIError(`Method ${req.method} not allowed for stats`, 405);
+        throw new APIError(`Method ${req.method} not allowed for stats`, 405, {
+          allowedMethods: ['GET']
+        });
       }
       response = await handleGetStats(repository);
-    } else if (isIndividualTask) {
-      // Individual task operations: /api/tasks/[id]
-      response = await handleIndividualTask(req, taskId, repository);
-      if (req.method === 'POST') statusCode = 201;
-    } else {
-      // Collection operations: /api/tasks
+      
+    } else if (pathname === '/api/tasks') {
+      // Handle /api/tasks (collection operations)
       response = await handleTaskCollection(req, repository);
       if (req.method === 'POST') statusCode = 201;
+      
+    } else if (pathname.startsWith('/api/tasks/') && pathParts.length === 3) {
+      // Handle /api/tasks/{id} (individual task operations)
+      const taskId = pathParts[2];
+      
+      // Make sure it's not "stats" (which should be handled above)
+      if (taskId === 'stats') {
+        throw new APIError('Invalid routing - stats should be handled separately', 500);
+      }
+      
+      response = await handleIndividualTask(req, taskId, repository);
+      
+    } else {
+      // Unknown endpoint
+      throw new APIError(`Endpoint not found: ${pathname}`, 404, {
+        type: 'endpoint_not_found',
+        availableEndpoints: [
+          'GET /api/tasks',
+          'POST /api/tasks', 
+          'GET /api/tasks/{id}',
+          'PUT /api/tasks/{id}',
+          'DELETE /api/tasks/{id}',
+          'GET /api/tasks/stats'
+        ]
+      });
     }
 
     logResponse(req, res, statusCode);
@@ -201,7 +329,7 @@ export default async function handler(req, res) {
         timestamp: new Date().toISOString(),
         requestId,
         method: req.method,
-        endpoint: url.pathname
+        endpoint: pathname
       }
     });
 
@@ -215,28 +343,67 @@ export default async function handler(req, res) {
 async function handleTaskCollection(req, repository) {
   switch (req.method) {
     case 'GET':
-      const filters = validateTaskFilters(req);
-      const result = await repository.findAll(filters);
-      return {
-        ...result,
-        filters: {
-          applied: filters,
-          available: {
-            status: ['todo', 'in_progress', 'completed'],
-            priority: ['low', 'medium', 'high'],
-            sortBy: ['title', 'status', 'priority', 'createdAt', 'updatedAt', 'dueDate'],
-            sortOrder: ['asc', 'desc']
+      try {
+        const filters = validateTaskFilters(req);
+        console.log('Fetching tasks with filters:', filters);
+        
+        const result = await repository.findAll(filters);
+        
+        return {
+          ...result,
+          filters: {
+            applied: filters,
+            available: {
+              status: ['todo', 'in_progress', 'completed'],
+              priority: ['low', 'medium', 'high'],
+              sortBy: ['title', 'status', 'priority', 'createdAt', 'updatedAt', 'dueDate'],
+              sortOrder: ['asc', 'desc']
+            }
+          },
+          summary: {
+            totalTasks: result.pagination.total,
+            filteredTasks: result.tasks.length,
+            hasFilters: Object.keys(filters).some(key => 
+              filters[key] !== undefined && 
+              filters[key] !== '' && 
+              (Array.isArray(filters[key]) ? filters[key].length > 0 : true)
+            )
           }
-        }
-      };
+        };
+      } catch (error) {
+        if (error instanceof APIError) throw error;
+        console.error('Error fetching tasks:', error);
+        throw new APIError('Failed to fetch tasks', 500, {
+          type: 'database_error',
+          originalError: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+      }
 
     case 'POST':
-      const validatedData = validateCreateTask(req);
-      const newTask = await repository.create(validatedData);
-      return {
-        task: newTask,
-        message: 'Task created successfully'
-      };
+      try {
+        const validatedData = validateCreateTask(req);
+        console.log('Creating task:', { title: validatedData.title, status: validatedData.status });
+        
+        const newTask = await repository.create(validatedData);
+        
+        return {
+          task: newTask,
+          message: 'Task created successfully',
+          summary: {
+            id: newTask.id,
+            title: newTask.title,
+            status: newTask.status,
+            priority: newTask.priority
+          }
+        };
+      } catch (error) {
+        if (error instanceof APIError) throw error;
+        console.error('Error creating task:', error);
+        throw new APIError('Failed to create task', 500, {
+          type: 'database_error',
+          originalError: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+      }
 
     default:
       throw new APIError(`Method ${req.method} not allowed`, 405, {
@@ -247,55 +414,95 @@ async function handleTaskCollection(req, repository) {
 
 // Handler for individual task operations
 async function handleIndividualTask(req, taskId, repository) {
-  // Validate task ID format
-  const { error } = taskSchemas.taskId.validate({ id: taskId });
-  if (error) {
+  // Basic UUID format validation
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(taskId)) {
     throw new APIError('Invalid task ID format', 400, {
       type: 'validation_error',
-      errors: [{ field: 'id', message: 'Task ID must be a valid UUID' }]
+      errors: [{ 
+        field: 'id', 
+        message: 'Task ID must be a valid UUID format',
+        value: taskId
+      }]
     });
   }
 
   switch (req.method) {
     case 'GET':
-      const task = await repository.findById(taskId);
-      if (!task) {
-        throw new APIError('Task not found', 404, {
-          type: 'resource_not_found',
-          resource: 'task',
-          resourceId: taskId
-        });
+      try {
+        const task = await repository.findById(taskId);
+        if (!task) {
+          throw new APIError('Task not found', 404, {
+            type: 'resource_not_found',
+            resource: 'task',
+            resourceId: taskId
+          });
+        }
+        
+        return {
+          task,
+          summary: {
+            id: task.id,
+            title: task.title,
+            status: task.status,
+            priority: task.priority,
+            isOverdue: task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'completed'
+          }
+        };
+      } catch (error) {
+        if (error instanceof APIError) throw error;
+        console.error('Error fetching task:', error);
+        throw new APIError('Failed to fetch task', 500);
       }
-      return { task };
 
     case 'PUT':
-      const validatedUpdates = validateUpdateTask(req);
-      const updatedTask = await repository.update(taskId, validatedUpdates);
-      if (!updatedTask) {
-        throw new APIError('Task not found', 404, {
-          type: 'resource_not_found',
-          resource: 'task',
-          resourceId: taskId
-        });
+      try {
+        const validatedUpdates = validateUpdateTask(req);
+        const updatedTask = await repository.update(taskId, validatedUpdates);
+        
+        if (!updatedTask) {
+          throw new APIError('Task not found', 404, {
+            type: 'resource_not_found',
+            resource: 'task',
+            resourceId: taskId
+          });
+        }
+        
+        return {
+          task: updatedTask,
+          message: 'Task updated successfully',
+          summary: {
+            id: updatedTask.id,
+            title: updatedTask.title,
+            updatedFields: Object.keys(validatedUpdates)
+          }
+        };
+      } catch (error) {
+        if (error instanceof APIError) throw error;
+        console.error('Error updating task:', error);
+        throw new APIError('Failed to update task', 500);
       }
-      return {
-        task: updatedTask,
-        message: 'Task updated successfully'
-      };
 
     case 'DELETE':
-      const deletedTask = await repository.delete(taskId);
-      if (!deletedTask) {
-        throw new APIError('Task not found', 404, {
-          type: 'resource_not_found',
-          resource: 'task',
-          resourceId: taskId
-        });
+      try {
+        const deletedTask = await repository.delete(taskId);
+        if (!deletedTask) {
+          throw new APIError('Task not found', 404, {
+            type: 'resource_not_found',
+            resource: 'task',
+            resourceId: taskId
+          });
+        }
+        
+        return {
+          task: deletedTask,
+          message: 'Task deleted successfully'
+        };
+      } catch (error) {
+        if (error instanceof APIError) throw error;
+        console.error('Error deleting task:', error);
+        throw new APIError('Failed to delete task', 500);
       }
-      return {
-        task: deletedTask,
-        message: 'Task deleted successfully'
-      };
 
     default:
       throw new APIError(`Method ${req.method} not allowed`, 405, {
@@ -306,26 +513,36 @@ async function handleIndividualTask(req, taskId, repository) {
 
 // Handler for stats endpoint
 async function handleGetStats(repository) {
-  const stats = await repository.getStats();
-  
-  const enhancedStats = {
-    ...stats,
-    completion: {
-      rate: stats.total > 0 ? Math.round((stats.byStatus.completed / stats.total) * 100) : 0,
-      total: stats.byStatus.completed,
-      remaining: stats.byStatus.todo + stats.byStatus.in_progress
-    },
-    productivity: {
-      completedToday: stats.completedToday,
-      overdueItems: stats.overdue,
-      inProgressItems: stats.byStatus.in_progress
-    }
-  };
+  try {
+    console.log('Fetching task statistics...');
+    
+    const stats = await repository.getStats();
+    
+    const enhancedStats = {
+      ...stats,
+      completion: {
+        rate: stats.total > 0 ? Math.round((stats.byStatus.completed / stats.total) * 100) : 0,
+        total: stats.byStatus.completed,
+        remaining: stats.byStatus.todo + stats.byStatus.in_progress
+      },
+      productivity: {
+        completedToday: stats.completedToday,
+        overdueItems: stats.overdue,
+        inProgressItems: stats.byStatus.in_progress
+      }
+    };
 
-  return {
-    statistics: enhancedStats,
-    summary: generateSummary(enhancedStats)
-  };
+    return {
+      statistics: enhancedStats,
+      summary: generateSummary(enhancedStats)
+    };
+  } catch (error) {
+    console.error('Error fetching stats:', error);
+    throw new APIError('Failed to fetch statistics', 500, {
+      type: 'database_error',
+      originalError: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
 }
 
 function generateSummary(stats) {
