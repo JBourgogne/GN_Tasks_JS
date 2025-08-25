@@ -1,37 +1,123 @@
 {
   "name": "task-management-app",
   "version": "1.0.0",
-  "description": "Full-stack task management application",
+  "description": "Full-stack task management application with modern development practices",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    
     "test": "vitest",
-    "lint": "eslint src/ api/ --ext .js,.jsx"
+    "test:run": "vitest run",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage",
+    "test:frontend": "vitest run --config vitest.config.frontend.js",
+    "test:frontend:coverage": "vitest run --coverage --config vitest.config.frontend.js",
+    "test:backend": "vitest run --config vitest.config.backend.js",
+    "test:backend:coverage": "vitest run --coverage --config vitest.config.backend.js",
+    "test:integration": "vitest run --config vitest.config.integration.js",
+    "test:all": "npm run test:frontend && npm run test:backend && npm run test:integration",
+    
+    "lint": "eslint src/ api/ --ext .js,.jsx",
+    "lint:fix": "eslint src/ api/ --ext .js,.jsx --fix",
+    "format": "prettier --write \"src/**/*.{js,jsx,css,md}\" \"api/**/*.js\"",
+    "format:check": "prettier --check \"src/**/*.{js,jsx,css,md}\" \"api/**/*.js\"",
+    
+    "type-check": "tsc --noEmit",
+    
+    "analyze": "npm run build && npx vite-bundle-analyzer dist/stats.html",
+    
+    "vercel:dev": "vercel dev",
+    "vercel:build": "vercel build",
+    "vercel:deploy:staging": "vercel --target staging",
+    "vercel:deploy:prod": "vercel --prod"
   },
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "@tanstack/react-query": "^5.8.4",
     "axios": "^1.6.0",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "joi": "^17.11.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",
     "vite": "^5.0.8",
+    
+    "@testing-library/jest-dom": "^6.1.5",
+    "@testing-library/react": "^14.1.2",
+    "@testing-library/user-event": "^14.5.2",
     "vitest": "^1.0.4",
     "@vitest/ui": "^1.0.4",
+    "@vitest/coverage-v8": "^1.0.4",
     "jsdom": "^23.0.1",
-    "@testing-library/react": "^14.1.2",
-    "@testing-library/jest-dom": "^6.1.5",
-    "@testing-library/user-event": "^14.5.2",
+    "msw": "^2.0.11",
+    
     "eslint": "^8.55.0",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-react-refresh": "^0.4.5"
+    "eslint-plugin-react-refresh": "^0.4.5",
+    "eslint-plugin-vitest": "^0.3.10",
+    "@typescript-eslint/eslint-plugin": "^6.14.0",
+    "@typescript-eslint/parser": "^6.14.0",
+    
+    "prettier": "^3.1.0",
+    "prettier-plugin-organize-imports": "^3.2.4",
+    
+    "typescript": "^5.3.0",
+    
+    "@vercel/node": "^3.0.12",
+    "vercel": "^32.5.0"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "prettier": {
+    "semi": true,
+    "singleQuote": true,
+    "tabWidth": 2,
+    "trailingComma": "es5",
+    "printWidth": 100,
+    "plugins": ["prettier-plugin-organize-imports"]
+  },
+  "eslintConfig": {
+    "extends": [
+      "eslint:recommended",
+      "@typescript-eslint/recommended",
+      "plugin:react/recommended",
+      "plugin:react-hooks/recommended",
+      "plugin:vitest/recommended"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "plugins": ["@typescript-eslint", "react", "react-hooks", "vitest"],
+    "env": {
+      "browser": true,
+      "node": true,
+      "es2022": true
+    },
+    "rules": {
+      "react/react-in-jsx-scope": "off",
+      "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+      "no-console": ["warn", { "allow": ["warn", "error"] }]
+    },
+    "settings": {
+      "react": {
+        "version": "detect"
+      }
+    }
   }
 }
