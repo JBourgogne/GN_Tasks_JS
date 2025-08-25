@@ -539,11 +539,24 @@ export default async function handler(req, res) {
     // Log request
     requestId = logRequest(req);
 
-    // Parse URL to determine routing
-    const url = new URL(req.url, `http://${req.headers.host}`);
-    const pathname = url.pathname;
+    // Parse URL to determine routing - handle Vercel serverless function context
+    let pathname;
+    try {
+      const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+      pathname = url.pathname;
+    } catch (error) {
+      // Fallback for cases where URL parsing fails
+      pathname = req.url || '/';
+    }
+    
+    // Normalize pathname for Vercel serverless functions
+    // In Vercel, the rewrite might strip /api from the path
+    if (!pathname.startsWith('/api')) {
+      pathname = '/api' + (pathname === '/' ? '' : pathname);
+    }
     
     console.log('Request pathname:', pathname);
+    console.log('Original req.url:', req.url);
 
     // Validate content type for POST/PUT requests
     validateContentType(req);
@@ -557,9 +570,9 @@ export default async function handler(req, res) {
     let statusCode = 200;
     let response;
 
-    // Route handling
-    if (pathname === '/api' || pathname === '/api/') {
-      // Health check endpoint
+    // Route handling - be more flexible with health check endpoint
+    if (pathname === '/api' || pathname === '/api/' || pathname === '/api/health') {
+      // Health check endpoint - accept /api, /api/, or /api/health
       if (req.method !== 'GET') {
         throw new APIError(`Method ${req.method} not allowed for health check`, 405, {
           allowedMethods: ['GET']
@@ -581,7 +594,7 @@ export default async function handler(req, res) {
       response = await handleTasksCollection(req, repository);
       if (req.method === 'POST') statusCode = 201;
       
-    } else if (pathname.startsWith('/api/tasks/') && pathname !== '/api/tasks/stats') {
+    } else if (pathname.startsWith('/api/tasks/') && !pathname.endsWith('/stats')) {
       // Individual task endpoints
       const taskId = pathname.split('/api/tasks/')[1];
       if (!taskId || taskId.includes('/')) {
@@ -595,6 +608,7 @@ export default async function handler(req, res) {
         type: 'endpoint_not_found',
         availableEndpoints: [
           'GET /api/',
+          'GET /api/health',
           'GET /api/tasks',
           'POST /api/tasks', 
           'GET /api/tasks/{id}',

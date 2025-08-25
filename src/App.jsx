@@ -5,6 +5,7 @@ import FilterBar from './components/FilterBar/FilterBar.jsx';
 import Dashboard from './components/Dashboard/Dashboard.jsx';
 import { TaskProvider } from './context/TaskContext.jsx';
 import { useTasks } from './hooks/useTasks.js';
+import { tasksAPI } from './utils/api.js';  // Add this import
 import './App.css';
 
 // Main App Content (wrapped in TaskProvider)
@@ -40,9 +41,8 @@ function AppContent() {
   useEffect(() => {
     const initializeApp = async () => {
       try {
-        // Test backend connection
-        const response = await fetch('/api/health');
-        const data = await response.json();
+        // Test backend connection using API utility
+        const data = await tasksAPI.healthCheck();
         
         if (data.success) {
           setBackendStatus(`✅ Connected - ${data.data.status}`);
@@ -170,6 +170,16 @@ function AppContent() {
 
   // Refresh all data
   const handleRefreshData = async () => {
+    try {
+      // Also refresh the backend status
+      const healthData = await tasksAPI.healthCheck();
+      if (healthData.success) {
+        setBackendStatus(`✅ Connected - ${healthData.data.status}`);
+      }
+    } catch (error) {
+      setBackendStatus('❌ Backend connection failed');
+    }
+    
     await Promise.all([loadTasks(), loadStats()]);
   };
 
