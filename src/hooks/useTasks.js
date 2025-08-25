@@ -1,5 +1,5 @@
-// Hooks for using Tasks
-import { useCallback, useEffect } from 'react';
+// src/hooks/useTasks.js - Fixed version that resolves loading state issues
+import { useCallback, useEffect, useRef } from 'react';
 import { useTaskState, useTaskDispatch, taskActions } from '../context/TaskContext.jsx';
 import { useTasksApi } from './useApi.js';
 
@@ -8,6 +8,10 @@ export function useTasks() {
   const state = useTaskState();
   const dispatch = useTaskDispatch();
   const api = useTasksApi();
+  
+  // Use refs to track loading states and prevent infinite loops
+  const isLoadingTasks = useRef(false);
+  const loadTasksTimeoutRef = useRef(null);
 
   // Helper function to clean filters before sending to API
   const cleanFilters = useCallback((filters) => {
@@ -45,11 +49,18 @@ export function useTasks() {
     });
 
     return cleaned;
-  }, []);
+  }, []); // No dependencies needed for this pure function
 
   // Load tasks based on current filters
-  const loadTasks = useCallback(async (overrideFilters = null) => {
+  const loadTasks = useCallback(async (overrideFilters = null, force = false) => {
+    // Prevent concurrent loadTasks calls
+    if (isLoadingTasks.current && !force) {
+      console.log('loadTasks already running, skipping...');
+      return;
+    }
+
     try {
+      isLoadingTasks.current = true;
       dispatch(taskActions.setLoading(true));
       
       const filtersToUse = overrideFilters || state.filters;
@@ -66,10 +77,15 @@ export function useTasks() {
 
       if (result && result.success) {
         dispatch(taskActions.setTasks(result.data));
+      } else {
+        // Ensure loading state is cleared even if API returns success: false
+        dispatch(taskActions.setLoading(false));
       }
     } catch (error) {
       console.error('Load tasks error:', error);
-      // Error is already handled by the API hook and onError callback
+      dispatch(taskActions.setLoading(false));
+    } finally {
+      isLoadingTasks.current = false;
     }
   }, [state.filters, api, dispatch, cleanFilters]);
 
@@ -220,8 +236,15 @@ export function useTasks() {
     
     dispatch(taskActions.setFilters(cleanedNewFilters));
     
-    // Load tasks with cleaned filters
-    await loadTasks(updatedFilters);
+    // Clear any pending timeout
+    if (loadTasksTimeoutRef.current) {
+      clearTimeout(loadTasksTimeoutRef.current);
+    }
+    
+    // Debounce the loadTasks call to prevent rapid firing
+    loadTasksTimeoutRef.current = setTimeout(() => {
+      loadTasks(updatedFilters, true); // force = true to bypass concurrency check
+    }, 100);
   }, [state.filters, dispatch, loadTasks, cleanFilters]);
 
   // Update search and reload tasks (with debouncing)
@@ -235,7 +258,15 @@ export function useTasks() {
       search: trimmedSearch 
     };
     
-    await loadTasks(updatedFilters);
+    // Clear any pending timeout
+    if (loadTasksTimeoutRef.current) {
+      clearTimeout(loadTasksTimeoutRef.current);
+    }
+    
+    // Debounce the search
+    loadTasksTimeoutRef.current = setTimeout(() => {
+      loadTasks(updatedFilters, true);
+    }, 300);
   }, [state.filters, dispatch, loadTasks]);
 
   // Update sort and reload tasks
@@ -248,7 +279,7 @@ export function useTasks() {
       sortOrder 
     };
     
-    await loadTasks(updatedFilters);
+    await loadTasks(updatedFilters, true);
   }, [state.filters, dispatch, loadTasks]);
 
   // Clear all filters
@@ -269,7 +300,7 @@ export function useTasks() {
     await loadTasks({
       sortBy: 'updatedAt',
       sortOrder: 'desc'
-    });
+    }, true);
   }, [dispatch, loadTasks]);
 
   // Select a task
@@ -299,26 +330,13 @@ export function useTasks() {
     dispatch(taskActions.clearError());
   }, [dispatch]);
 
-  // Auto-load tasks when filters change (except search)
+  // Initial load effect - only run once on mount if no tasks exist
   useEffect(() => {
-    // Only auto-load if we don't have tasks yet, or if non-search filters changed
-    const hasNonSearchFilters = state.filters.status || 
-                               state.filters.priority || 
-                               (Array.isArray(state.filters.tags) && state.filters.tags.length > 0) ||
-                               state.filters.overdue === true;
-
-    if (state.tasks.length === 0 || hasNonSearchFilters) {
-      loadTasks();
+    if (state.tasks.length === 0 && !isLoadingTasks.current) {
+      console.log('Initial tasks load...');
+      loadTasks(null, true);
     }
-  }, [
-    state.filters.status,
-    state.filters.priority,
-    state.filters.tags,
-    state.filters.overdue,
-    state.filters.sortBy,
-    state.filters.sortOrder
-    // Note: search is excluded from deps to avoid auto-loading on every keystroke
-  ]);
+  }, []); // Empty dependency array - only run on mount
 
   // Auto-load stats periodically
   useEffect(() => {
@@ -330,11 +348,20 @@ export function useTasks() {
     return () => clearInterval(interval);
   }, [loadStats]);
 
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (loadTasksTimeoutRef.current) {
+        clearTimeout(loadTasksTimeoutRef.current);
+      }
+    };
+  }, []);
+
   return {
     // State
     tasks: state.tasks,
     stats: state.stats,
-    loading: state.loading || api.loading,
+    loading: (state.loading || api.loading) && isLoadingTasks.current, // More refined loading state
     error: state.error || api.error,
     filters: state.filters,
     pagination: state.pagination,

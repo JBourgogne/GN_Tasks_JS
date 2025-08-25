@@ -64,20 +64,21 @@ const initialState = {
   }
 };
 
-// Reducer function
+// Reducer function with improved loading state management
 function taskReducer(state, action) {
   switch (action.type) {
     case ACTIONS.SET_LOADING:
       return {
         ...state,
         loading: action.payload,
-        error: action.payload ? null : state.error // Clear error when loading starts
+        // Don't clear error when starting to load, but clear it when loading stops
+        error: action.payload ? state.error : null
       };
 
     case ACTIONS.SET_ERROR:
       return {
         ...state,
-        loading: false,
+        loading: false, // Always clear loading when setting an error
         error: action.payload
       };
 
@@ -92,7 +93,7 @@ function taskReducer(state, action) {
         ...state,
         tasks: action.payload.tasks || [],
         pagination: action.payload.pagination || state.pagination,
-        loading: false,
+        loading: false, // Always clear loading when tasks are set
         error: null
       };
 
@@ -103,7 +104,8 @@ function taskReducer(state, action) {
         pagination: {
           ...state.pagination,
           total: state.pagination.total + 1
-        }
+        },
+        loading: false // Clear loading after successful add
       };
 
     case ACTIONS.UPDATE_TASK:
@@ -200,6 +202,11 @@ const TaskDispatchContext = createContext();
 // Context provider component
 export function TaskProvider({ children }) {
   const [state, dispatch] = useReducer(taskReducer, initialState);
+
+  // Debug logging for loading state changes
+  React.useEffect(() => {
+    console.log('Loading state changed:', state.loading);
+  }, [state.loading]);
 
   return (
     <TaskContext.Provider value={state}>
