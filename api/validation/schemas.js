@@ -1,4 +1,4 @@
-// ===== api/validation/schemas.js =====
+// Schemas for Validating Tasks
 import Joi from 'joi';
 
 // Task validation schemas

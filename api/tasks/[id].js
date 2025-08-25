@@ -1,4 +1,4 @@
-// api/tasks/[id].js - Individual Task Operations (GET, PUT, DELETE)
+// Individual Task Operations (GET, PUT, DELETE)
 import { getTaskRepository } from '../data/TaskRepository.js';
 import { setCorsHeaders, handleCorsPrelight } from '../middleware/cors.js';
 import { logRequest, logResponse } from '../middleware/logger.js';

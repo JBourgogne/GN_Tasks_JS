@@ -1,10 +1,4 @@
-/**
- * TaskRepository Interface
- * 
- * This interface defines the contract that any TaskRepository implementation
- * must follow. This allows easy switching between different storage backends
- * (in-memory, SQLite, PostgreSQL, MongoDB, etc.)
- */
+// TaskRepository Interface
 
 /**
  * @interface ITaskRepository

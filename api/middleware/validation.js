@@ -1,4 +1,4 @@
-// ===== api/middleware/validation.js =====
+// Validation Middleware
 import { APIError } from './errorHandler.js';
 
 /**

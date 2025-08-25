@@ -1,4 +1,4 @@
-// api/tasks.js - Complete Tasks API with Joi Validation
+// Complete Tasks API with Joi Validation
 import { getTaskRepository } from './data/TaskRepository.js';
 import { setCorsHeaders, handleCorsPrelight } from './middleware/cors.js';
 import { logRequest, logResponse } from './middleware/logger.js';

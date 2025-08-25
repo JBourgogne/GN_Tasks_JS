@@ -1,6 +1,5 @@
-/**
- * Request parsing middleware for Vercel serverless functions
- */
+// Parser Function
+
 import { APIError } from './errorHandler.js';
 
 /**
@@ -19,7 +18,11 @@ export function parseJSONBody(req) {
     try {
       return JSON.parse(req.body);
     } catch (error) {
-      throw new APIError('Invalid JSON in request body', 400);
+      throw new APIError('Invalid JSON in request body', 400, {
+        type: 'json_parse_error',
+        message: 'Request body contains malformed JSON',
+        details: error.message
+      });
     }
   }
   
@@ -37,8 +40,10 @@ export function validateContentType(req) {
     
     if (!contentType.includes('application/json')) {
       throw new APIError('Content-Type must be application/json', 400, {
+        type: 'content_type_error',
         received: contentType,
-        expected: 'application/json'
+        expected: 'application/json',
+        message: 'Request body must be JSON with Content-Type: application/json header'
       });
     }
   }

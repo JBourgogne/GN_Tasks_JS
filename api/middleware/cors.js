@@ -1,6 +1,4 @@
-/**
- * CORS middleware for Vercel serverless functions
- */
+//CORS middleware for Vercel serverless functions
 
 const ALLOWED_ORIGINS = [
   'http://localhost:3000',
