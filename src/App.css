@@ -14,9 +14,11 @@
 }
 
 .App-content {
-  max-width: 1600px; /* Increased for side-by-side layout */
+  max-width: 100%; /* Use full width */
   margin: 0 auto;
   width: 100%;
+  padding: 0 8px; /* Add some padding for very wide screens */
+  box-sizing: border-box;
 }
 
 .App-header {
@@ -634,4 +636,30 @@
 .btn-danger:hover {
   background: #ff3838;
   border-color: #ff3838;
+}
+
+/* Large Desktop - Full width optimization */
+@media (min-width: 1400px) {
+  .App-content {
+    max-width: none; /* Remove width constraint completely */
+    padding: 0 16px; /* Add reasonable padding for ultrawide screens */
+  }
+  
+  .main-content-grid {
+    grid-template-columns: 2.5fr 1fr; /* Adjust ratio for very wide screens */
+    gap: 20px;
+    max-width: 2400px; /* Optional: prevent it from getting TOO wide */
+    margin: 0 auto;
+  }
+  
+  .dashboard-column {
+    max-width: 400px; /* Prevent dashboard from getting too wide */
+  }
+}
+
+/* Ultrawide screens - Optional constraint */
+@media (min-width: 2000px) {
+  .main-content-grid {
+    max-width: 2000px; /* Reasonable maximum for ultrawide monitors */
+  }
 }
