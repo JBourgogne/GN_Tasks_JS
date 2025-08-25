@@ -1,173 +1,115 @@
-// src/hooks/useTasks.js - Ultra-stable version to prevent infinite loops
-import { useCallback, useEffect, useRef } from 'react';
+// src/hooks/useTasks.js - Stable version that eliminates infinite loops
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTaskState, useTaskDispatch, taskActions } from '../context/TaskContext.jsx';
 import { useTasksApi } from './useApi.js';
 
+// Main hook for task management - simplified to prevent infinite loops
 export function useTasks() {
   const state = useTaskState();
   const dispatch = useTaskDispatch();
   const api = useTasksApi();
   
-  // Use refs to prevent infinite loops and track state
-  const isInitialized = useRef(false);
-  const isLoadingTasks = useRef(false);
-  const isLoadingStats = useRef(false);
-  const lastFiltersRef = useRef(JSON.stringify(state.filters));
+  // Local state to track if we've done initial load
+  const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false);
+  
+  // Use refs to prevent infinite loops and track operations
+  const isLoadingRef = useRef(false);
   const debounceTimeoutRef = useRef(null);
-  const retryCountRef = useRef(0);
-  const maxRetries = 3;
 
-  // Stable filter cleaner - no dependencies
+  // Helper function to clean filters
   const cleanFilters = useCallback((filters) => {
     if (!filters) return {};
     
     const cleaned = {};
     
-    if (filters.status && filters.status.trim()) cleaned.status = filters.status.trim();
-    if (filters.priority && filters.priority.trim()) cleaned.priority = filters.priority.trim();
-    if (filters.search && filters.search.trim()) cleaned.search = filters.search.trim();
-    if (filters.sortBy) cleaned.sortBy = filters.sortBy;
-    if (filters.sortOrder) cleaned.sortOrder = filters.sortOrder;
-    if (filters.overdue === true) cleaned.overdue = true;
-    
-    if (Array.isArray(filters.tags) && filters.tags.length > 0) {
-      const cleanTags = filters.tags.filter(tag => tag && tag.trim());
-      if (cleanTags.length > 0) cleaned.tags = cleanTags;
-    }
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        if (key === 'tags' && Array.isArray(value)) {
+          const cleanTags = value.filter(tag => tag && tag.trim());
+          if (cleanTags.length > 0) {
+            cleaned[key] = cleanTags;
+          }
+        } else if (key === 'overdue') {
+          if (value === true || value === 'true') {
+            cleaned[key] = true;
+          }
+        } else if (key === 'search' && typeof value === 'string') {
+          const trimmed = value.trim();
+          if (trimmed) {
+            cleaned[key] = trimmed;
+          }
+        } else if (['status', 'priority', 'sortBy', 'sortOrder'].includes(key) && value) {
+          cleaned[key] = value;
+        }
+      }
+    });
 
     return cleaned;
   }, []);
 
-  // Stable loadTasks function with circuit breaker
-  const loadTasks = useCallback(async (filtersOverride = null, force = false) => {
-    // Circuit breaker - prevent excessive retries
-    if (retryCountRef.current >= maxRetries && !force) {
-      console.log('Max retries reached, stopping loadTasks');
-      return;
-    }
-
+  // Load tasks function - simplified
+  const loadTasks = useCallback(async (filters = null) => {
     // Prevent concurrent calls
-    if (isLoadingTasks.current && !force) {
-      console.log('loadTasks already running, skipping');
+    if (isLoadingRef.current) {
+      console.log('loadTasks: already loading, skipping');
       return;
     }
 
     try {
-      isLoadingTasks.current = true;
+      isLoadingRef.current = true;
       dispatch(taskActions.setLoading(true));
       
-      const filters = filtersOverride || state.filters;
-      const cleanedFilters = cleanFilters(filters);
+      const filtersToUse = filters || state.filters;
+      const cleanedFilters = cleanFilters(filtersToUse);
       
-      console.log('Loading tasks with filters:', cleanedFilters);
+      console.log('loadTasks: Loading with filters:', cleanedFilters);
       
-      const result = await api.fetchTasks(cleanedFilters, {
-        showErrorToUser: false,
-        onError: (error) => {
-          console.error('Load tasks failed:', error);
-          retryCountRef.current += 1;
-        }
-      });
+      const result = await api.fetchTasks(cleanedFilters);
 
-      if (result && result.success && result.data) {
+      if (result && result.success) {
         dispatch(taskActions.setTasks(result.data));
-        retryCountRef.current = 0; // Reset retry count on success
+        console.log('loadTasks: Success, loaded', result.data.tasks?.length || 0, 'tasks');
       } else {
-        console.warn('No data received from API');
-        dispatch(taskActions.setLoading(false));
+        console.error('loadTasks: API returned success=false');
+        dispatch(taskActions.setError('Failed to load tasks'));
       }
+      
+      setHasInitiallyLoaded(true);
     } catch (error) {
-      console.error('LoadTasks error:', error);
-      dispatch(taskActions.setError('Failed to load tasks. Please refresh the page.'));
-      retryCountRef.current += 1;
+      console.error('loadTasks: Error:', error);
+      dispatch(taskActions.setError(`Failed to load tasks: ${error.message}`));
+      setHasInitiallyLoaded(true);
     } finally {
-      isLoadingTasks.current = false;
+      isLoadingRef.current = false;
+      dispatch(taskActions.setLoading(false));
     }
-  }, []); // NO dependencies to prevent infinite loops
+  }, [api, dispatch, cleanFilters]); // Removed state.filters from dependencies
 
-  // Stable loadStats function with circuit breaker
-  const loadStats = useCallback(async (force = false) => {
-    // Don't load stats if already loading or if we've hit max retries
-    if (isLoadingStats.current && !force) return;
-    if (retryCountRef.current >= maxRetries && !force) return;
-
+  // Load statistics - simplified
+  const loadStats = useCallback(async () => {
     try {
-      isLoadingStats.current = true;
-      
-      const result = await api.fetchStats({
-        showErrorToUser: false,
-        onError: (error) => {
-          console.error('Load stats failed:', error);
-          // Don't retry stats as aggressively
-        }
-      });
+      console.log('loadStats: Loading statistics...');
+      const result = await api.fetchStats();
 
-      if (result && result.success && result.data && result.data.statistics) {
+      if (result && result.success) {
         dispatch(taskActions.setStats(result.data.statistics));
+        console.log('loadStats: Success');
+      } else {
+        console.warn('loadStats: API returned success=false');
       }
     } catch (error) {
-      console.error('LoadStats error:', error);
-      // Don't show error to user for stats failures
-    } finally {
-      isLoadingStats.current = false;
+      console.error('loadStats: Error:', error);
+      // Don't show user errors for stats failures
     }
-  }, []); // NO dependencies
+  }, [api, dispatch]);
 
-  // Initialize data only once
-  const initializeData = useCallback(async () => {
-    if (isInitialized.current) return;
-    
-    console.log('Initializing app data...');
-    isInitialized.current = true;
-    
-    // Load tasks first, then stats
-    await loadTasks(null, true);
-    setTimeout(() => loadStats(true), 1000); // Delay stats to prevent concurrent API calls
-  }, []); // NO dependencies
-
-  // Debounced filter update
-  const updateFilters = useCallback(async (newFilters) => {
-    // Clear any pending debounce
-    if (debounceTimeoutRef.current) {
-      clearTimeout(debounceTimeoutRef.current);
-    }
-
-    // Update filters immediately in state
-    dispatch(taskActions.setFilters(newFilters));
-    
-    // Debounce the actual API call
-    debounceTimeoutRef.current = setTimeout(async () => {
-      const currentFiltersString = JSON.stringify({ ...state.filters, ...newFilters });
-      
-      // Only load if filters actually changed
-      if (currentFiltersString !== lastFiltersRef.current) {
-        lastFiltersRef.current = currentFiltersString;
-        await loadTasks({ ...state.filters, ...newFilters }, true);
-      }
-    }, 500); // 500ms debounce
-  }, []); // NO dependencies
-
-  // Debounced search update
-  const updateSearch = useCallback((searchTerm) => {
-    // Clear any pending debounce
-    if (debounceTimeoutRef.current) {
-      clearTimeout(debounceTimeoutRef.current);
-    }
-
-    const trimmedSearch = searchTerm?.trim() || '';
-    dispatch(taskActions.setSearch(trimmedSearch));
-    
-    // Debounce the actual API call
-    debounceTimeoutRef.current = setTimeout(async () => {
-      await loadTasks({ ...state.filters, search: trimmedSearch }, true);
-    }, 800); // Longer debounce for search
-  }, []); // NO dependencies
-
-  // Simple task operations
+  // Create a new task
   const createTask = useCallback(async (taskData) => {
     try {
+      console.log('createTask: Creating task:', taskData.title);
+      
       const cleanTaskData = {
-        title: taskData.title?.trim() || '',
+        title: taskData.title?.trim(),
         description: taskData.description?.trim() || '',
         status: taskData.status || 'todo',
         priority: taskData.priority || 'medium',
@@ -177,72 +119,146 @@ export function useTasks() {
           : []
       };
 
-      if (!cleanTaskData.title) {
-        throw new Error('Title is required');
-      }
-
       const result = await api.createTask(cleanTaskData);
 
-      if (result && result.success && result.data && result.data.task) {
+      if (result && result.success) {
         dispatch(taskActions.addTask(result.data.task));
-        // Refresh stats after a delay
-        setTimeout(() => loadStats(true), 500);
+        console.log('createTask: Success, created task:', result.data.task.id);
+        
+        // Refresh stats but don't wait for it
+        loadStats().catch(console.error);
+        
         return result.data.task;
       } else {
-        throw new Error('Failed to create task');
+        throw new Error(result?.error?.message || 'Failed to create task');
       }
     } catch (error) {
+      console.error('createTask: Error:', error);
       dispatch(taskActions.setError(`Failed to create task: ${error.message}`));
       throw error;
     }
-  }, []); // NO dependencies
+  }, [api, dispatch, loadStats]);
 
+  // Update an existing task
   const updateTask = useCallback(async (id, updates) => {
+    const currentTask = state.tasks.find(task => task.id === id);
+    
+    // Optimistic update
+    if (currentTask) {
+      const optimisticTask = { 
+        ...currentTask, 
+        ...updates, 
+        updatedAt: new Date().toISOString() 
+      };
+      dispatch(taskActions.updateTask(optimisticTask));
+    }
+
     try {
-      const result = await api.updateTask(id, updates);
+      console.log('updateTask: Updating task:', id);
       
-      if (result && result.success && result.data && result.data.task) {
+      const result = await api.updateTask(id, updates);
+
+      if (result && result.success) {
         dispatch(taskActions.updateTask(result.data.task));
+        console.log('updateTask: Success');
         
-        // Only refresh stats if status changed
+        // Refresh stats if status changed
         if (updates.status) {
-          setTimeout(() => loadStats(true), 500);
+          loadStats().catch(console.error);
         }
         
         return result.data.task;
+      } else {
+        throw new Error(result?.error?.message || 'Failed to update task');
       }
     } catch (error) {
+      console.error('updateTask: Error:', error);
+      
+      // Revert optimistic update
+      if (currentTask) {
+        dispatch(taskActions.updateTask(currentTask));
+      }
+      
       dispatch(taskActions.setError(`Failed to update task: ${error.message}`));
       throw error;
     }
-  }, []); // NO dependencies
+  }, [state.tasks, api, dispatch, loadStats]);
 
+  // Delete a task
   const deleteTask = useCallback(async (id) => {
+    const taskToDelete = state.tasks.find(task => task.id === id);
+    
+    // Optimistic delete
+    dispatch(taskActions.deleteTask(id));
+
     try {
-      const result = await api.deleteTask(id);
+      console.log('deleteTask: Deleting task:', id);
       
+      const result = await api.deleteTask(id);
+
       if (result && result.success) {
-        dispatch(taskActions.deleteTask(id));
-        setTimeout(() => loadStats(true), 500);
+        console.log('deleteTask: Success');
+        loadStats().catch(console.error);
         return true;
+      } else {
+        throw new Error(result?.error?.message || 'Failed to delete task');
       }
     } catch (error) {
+      console.error('deleteTask: Error:', error);
+      
+      // Revert optimistic delete
+      if (taskToDelete) {
+        dispatch(taskActions.addTask(taskToDelete));
+      }
+      
       dispatch(taskActions.setError(`Failed to delete task: ${error.message}`));
       throw error;
     }
-  }, []); // NO dependencies
+  }, [state.tasks, api, dispatch, loadStats]);
 
-  // Simple utility functions
-  const selectTask = useCallback((task) => {
-    dispatch(taskActions.setSelectedTask(task));
-  }, [dispatch]);
+  // Update filters - with debouncing to prevent rapid calls
+  const updateFilters = useCallback(async (newFilters) => {
+    console.log('updateFilters: New filters:', newFilters);
+    
+    // Clear any pending debounced call
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+    
+    // Update filters immediately in state
+    dispatch(taskActions.setFilters(newFilters));
+    
+    // Debounce the API call
+    debounceTimeoutRef.current = setTimeout(() => {
+      const updatedFilters = { ...state.filters, ...newFilters };
+      loadTasks(updatedFilters);
+    }, 300);
+  }, [dispatch, loadTasks]); // Removed state.filters from dependencies
 
-  const clearError = useCallback(() => {
-    dispatch(taskActions.clearError());
-    retryCountRef.current = 0; // Reset retry count when user clears error
-  }, [dispatch]);
+  // Update search - with debouncing
+  const updateSearch = useCallback(async (searchTerm) => {
+    const trimmedSearch = searchTerm?.trim() || '';
+    console.log('updateSearch: Search term:', trimmedSearch);
+    
+    // Clear any pending debounced call
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+    
+    // Update search immediately in state
+    dispatch(taskActions.setSearch(trimmedSearch));
+    
+    // Debounce the API call
+    debounceTimeoutRef.current = setTimeout(() => {
+      const updatedFilters = { ...state.filters, search: trimmedSearch };
+      loadTasks(updatedFilters);
+    }, 500); // Longer debounce for search
+  }, [dispatch, loadTasks]); // Removed state.filters from dependencies
 
+  // Clear all filters
   const clearFilters = useCallback(async () => {
+    console.log('clearFilters: Clearing all filters');
+    
     const clearedFilters = {
       status: '',
       priority: '',
@@ -254,57 +270,82 @@ export function useTasks() {
     };
     
     dispatch(taskActions.setFilters(clearedFilters));
-    await loadTasks(clearedFilters, true);
-  }, []); // NO dependencies
-
-  // Initialize only once on mount
-  useEffect(() => {
-    initializeData();
     
-    // Cleanup function
+    // Load tasks with cleared filters
+    setTimeout(() => {
+      loadTasks(clearedFilters);
+    }, 100);
+  }, [dispatch, loadTasks]);
+
+  // Select a task
+  const selectTask = useCallback((task) => {
+    dispatch(taskActions.setSelectedTask(task));
+  }, [dispatch]);
+
+  // Clear error
+  const clearError = useCallback(() => {
+    dispatch(taskActions.clearError());
+  }, [dispatch]);
+
+  // Initial load effect - ONLY run once on mount
+  useEffect(() => {
+    if (!hasInitiallyLoaded && !isLoadingRef.current) {
+      console.log('Initial load effect triggered');
+      loadTasks();
+    }
+  }, [hasInitiallyLoaded, loadTasks]); // Only depend on hasInitiallyLoaded
+
+  // Stats load effect - run once and then periodically
+  useEffect(() => {
+    console.log('Stats load effect triggered');
+    loadStats();
+    
+    // Refresh stats every 5 minutes
+    const interval = setInterval(() => {
+      console.log('Periodic stats refresh');
+      loadStats();
+    }, 5 * 60 * 1000);
+    
     return () => {
+      console.log('Cleaning up stats interval');
+      clearInterval(interval);
+    };
+  }, []); // Empty dependency array - only run on mount/unmount
+
+  // Cleanup effect
+  useEffect(() => {
+    return () => {
+      console.log('Cleaning up debounce timeout');
       if (debounceTimeoutRef.current) {
         clearTimeout(debounceTimeoutRef.current);
       }
     };
-  }, []); // Empty dependency array - run only once
-
-  // Periodic stats refresh - much less aggressive
-  useEffect(() => {
-    // Only set up interval if initialization is complete
-    if (!isInitialized.current) return;
-    
-    const interval = setInterval(() => {
-      if (!isLoadingStats.current && retryCountRef.current < maxRetries) {
-        loadStats(true);
-      }
-    }, 30000); // 30 seconds instead of 5 minutes to see changes faster, but not too aggressive
-    
-    return () => clearInterval(interval);
-  }, []); // Empty dependency array
+  }, []);
 
   return {
     // State
-    tasks: state.tasks || [],
+    tasks: state.tasks,
     stats: state.stats,
     loading: state.loading,
     error: state.error,
     filters: state.filters,
+    pagination: state.pagination,
     selectedTask: state.selectedTask,
+    modal: state.modal,
 
     // Actions
-    loadTasks: (filters, force) => loadTasks(filters, force),
-    loadStats: (force) => loadStats(force),
+    loadTasks,
+    loadStats,
     createTask,
     updateTask,
     deleteTask,
     updateFilters,
     updateSearch,
+    clearFilters,
     selectTask,
     clearError,
-    clearFilters,
 
-    // Utility
+    // API utilities
     api
   };
 }

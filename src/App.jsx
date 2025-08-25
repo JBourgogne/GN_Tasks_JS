@@ -5,7 +5,7 @@ import FilterBar from './components/FilterBar/FilterBar.jsx';
 import Dashboard from './components/Dashboard/Dashboard.jsx';
 import { TaskProvider } from './context/TaskContext.jsx';
 import { useTasks } from './hooks/useTasks.js';
-import { tasksAPI } from './utils/api.js';  // Add this import
+import { tasksAPI } from './utils/api.js';
 import './App.css';
 
 // Main App Content (wrapped in TaskProvider)
@@ -28,52 +28,58 @@ function AppContent() {
     clearError
   } = useTasks();
 
-  // Local state for UI
+  // Local UI state
   const [backendStatus, setBackendStatus] = useState('checking...');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
-  const [dashboardMode, setDashboardMode] = useState('full'); // 'full', 'compact', 'hidden'
+  const [dashboardMode, setDashboardMode] = useState('full');
 
-  // Initialize app - check backend and load data
+  // Initialize app - check backend health ONCE
   useEffect(() => {
+    let mounted = true;
+    
     const initializeApp = async () => {
       try {
-        // Test backend connection using API utility
+        console.log('App initialization started');
         const data = await tasksAPI.healthCheck();
         
-        if (data.success) {
+        if (mounted && data.success) {
           setBackendStatus(`✅ Connected - ${data.data.status}`);
-          
-          // Load initial data
-          await loadTasks();
-          await loadStats();
-        } else {
+          console.log('Backend health check successful');
+        } else if (mounted) {
           throw new Error('Health check failed');
         }
       } catch (error) {
         console.error('Backend connection error:', error);
-        setBackendStatus('❌ Backend connection failed');
+        if (mounted) {
+          setBackendStatus('❌ Backend connection failed');
+        }
       }
     };
 
     initializeApp();
-  }, [loadTasks, loadStats]);
+    
+    return () => {
+      mounted = false;
+    };
+  }, []); // Empty dependency array - only run once
 
-  // Handle filter changes from FilterBar
+  // Filter handlers - simplified
   const handleFiltersChange = useCallback(async (newFilters) => {
+    console.log('App: Filter change requested:', newFilters);
     await updateFilters(newFilters);
   }, [updateFilters]);
 
-  // Handle search with debouncing (handled by FilterBar)
   const handleSearchChange = useCallback(async (searchTerm) => {
+    console.log('App: Search change requested:', searchTerm);
     await updateSearch(searchTerm);
   }, [updateSearch]);
 
-  // Clear all filters
   const handleClearAllFilters = useCallback(async () => {
+    console.log('App: Clear all filters requested');
     const clearedFilters = {
       status: '',
       priority: '',
@@ -86,8 +92,8 @@ function AppContent() {
     await updateFilters(clearedFilters);
   }, [updateFilters]);
 
-  // Dashboard filter clicks
   const handleDashboardFilterChange = useCallback(async (filterChange) => {
+    console.log('App: Dashboard filter change:', filterChange);
     await updateFilters({
       ...contextFilters,
       ...filterChange
@@ -95,99 +101,112 @@ function AppContent() {
   }, [contextFilters, updateFilters]);
 
   // Task form handlers
-  const handleCreateTask = () => {
+  const handleCreateTask = useCallback(() => {
+    console.log('App: Create task button clicked');
     setShowCreateForm(true);
     setEditingTask(null);
     setFormError(null);
-  };
+  }, []);
 
-  const handleEditTask = (task) => {
+  const handleEditTask = useCallback((task) => {
+    console.log('App: Edit task requested:', task.id);
     setEditingTask(task);
     setShowCreateForm(true);
     setFormError(null);
-  };
+  }, []);
 
-  const handleCloseForm = () => {
+  const handleCloseForm = useCallback(() => {
+    console.log('App: Form close requested');
     setShowCreateForm(false);
     setEditingTask(null);
     setFormError(null);
-  };
+  }, []);
 
-  const handleFormSubmit = async (taskData) => {
+  const handleFormSubmit = useCallback(async (taskData) => {
+    console.log('App: Form submit requested:', taskData);
     setFormLoading(true);
     setFormError(null);
 
     try {
       if (editingTask) {
         await updateTask(editingTask.id, taskData);
+        console.log('App: Task updated successfully');
       } else {
         await createTask(taskData);
+        console.log('App: Task created successfully');
       }
       
-      // Success - close form and refresh data
+      // Close form on success
       handleCloseForm();
-      await loadStats(); // Refresh stats after create/update
     } catch (error) {
+      console.error('App: Form submit error:', error);
       setFormError(error.message);
     } finally {
       setFormLoading(false);
     }
-  };
+  }, [editingTask, updateTask, createTask, handleCloseForm]);
 
   // Task action handlers
-  const handleTaskStatusChange = async (taskId, newStatus) => {
+  const handleTaskStatusChange = useCallback(async (taskId, newStatus) => {
+    console.log('App: Task status change:', taskId, newStatus);
     try {
       await updateTask(taskId, { status: newStatus });
-      await loadStats(); // Refresh stats after status change
     } catch (error) {
       console.error('Failed to update task status:', error);
     }
-  };
+  }, [updateTask]);
 
-  const handleTaskSelect = (task) => {
+  const handleTaskSelect = useCallback((task) => {
     selectTask(task);
-  };
+  }, [selectTask]);
 
-  const handleDeleteTask = (task) => {
+  const handleDeleteTask = useCallback((task) => {
+    console.log('App: Delete task requested:', task.id);
     setDeleteConfirm(task);
-  };
+  }, []);
 
-  const confirmDelete = async () => {
+  const confirmDelete = useCallback(async () => {
     if (!deleteConfirm) return;
 
+    console.log('App: Confirming delete for:', deleteConfirm.id);
     try {
       await deleteTask(deleteConfirm.id);
-      await loadStats(); // Refresh stats after delete
       setDeleteConfirm(null);
+      console.log('App: Task deleted successfully');
     } catch (error) {
       console.error('Failed to delete task:', error);
     }
-  };
+  }, [deleteConfirm, deleteTask]);
 
-  const cancelDelete = () => {
+  const cancelDelete = useCallback(() => {
+    console.log('App: Delete cancelled');
     setDeleteConfirm(null);
-  };
+  }, []);
 
-  // Refresh all data
-  const handleRefreshData = async () => {
+  // Manual refresh
+  const handleRefreshData = useCallback(async () => {
+    console.log('App: Manual refresh requested');
     try {
-      // Also refresh the backend status
+      // Check backend status
       const healthData = await tasksAPI.healthCheck();
       if (healthData.success) {
         setBackendStatus(`✅ Connected - ${healthData.data.status}`);
       }
+      
+      // Refresh data
+      await Promise.all([loadTasks(), loadStats()]);
+      console.log('App: Manual refresh completed');
     } catch (error) {
+      console.error('App: Manual refresh error:', error);
       setBackendStatus('❌ Backend connection failed');
     }
-    
-    await Promise.all([loadTasks(), loadStats()]);
-  };
+  }, [loadTasks, loadStats]);
 
   // Get available tags for FilterBar
-  const getAvailableTags = () => {
+  const getAvailableTags = useCallback(() => {
     if (!stats?.tags?.popular) return [];
     return stats.tags.popular;
-  };
+  }, [stats]);
 
   return (
     <div className="App">
@@ -203,7 +222,7 @@ function AppContent() {
             <button 
               className="btn btn-primary"
               onClick={handleCreateTask}
-              disabled={loading}
+              // Removed disabled={loading} to prevent stuck state
             >
               ✨ Create New Task
             </button>
@@ -239,6 +258,7 @@ function AppContent() {
             <span>Backend: {backendStatus}</span>
             <span>Environment: {import.meta.env.MODE}</span>
             {stats && <span>Tasks: {stats.total} total</span>}
+            <span>Loading: {loading ? 'Yes' : 'No'}</span>
           </div>
         </div>
 
@@ -250,8 +270,8 @@ function AppContent() {
           </div>
         )}
 
-        {/* Global Loading State */}
-        {loading && !tasks.length && (
+        {/* Global Loading State - Only show for initial load */}
+        {loading && tasks.length === 0 && (
           <div className="loading-banner">
             <p>⏳ Loading tasks...</p>
           </div>
@@ -277,7 +297,7 @@ function AppContent() {
           onFiltersChange={handleFiltersChange}
           taskStats={stats}
           availableTags={getAvailableTags()}
-          loading={loading}
+          loading={false} // Don't disable filter bar during loading
           onClearFilters={handleClearAllFilters}
         />
 

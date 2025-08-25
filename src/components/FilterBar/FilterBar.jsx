@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import './FilterBar.css';
 
 function FilterBar({
@@ -7,122 +7,80 @@ function FilterBar({
   taskStats = null,
   availableTags = [],
   loading = false,
-  onClearFilters,
-  onToggleOverdue
+  onClearFilters
 }) {
-  // Local state for form inputs
-  const [localFilters, setLocalFilters] = useState({
-    search: '',
-    status: '',
-    priority: '',
-    tags: [],
-    overdue: false,
-    sortBy: 'updatedAt',
-    sortOrder: 'desc',
-    ...filters
-  });
+  // Local state only for search input (for immediate feedback)
+  const [searchInput, setSearchInput] = useState(filters.search || '');
 
-  // Debounced search state
-  const [searchTimeout, setSearchTimeout] = useState(null);
-
-  // Update local state when props change
-  useEffect(() => {
-    setLocalFilters(prev => ({
-      ...prev,
-      ...filters
-    }));
-  }, [filters]);
-
-  // Debounced search handler
-  const handleSearchChange = useCallback((searchValue) => {
-    setLocalFilters(prev => ({ ...prev, search: searchValue }));
+  // Handle search input changes (immediate UI update, debounced API call)
+  const handleSearchInputChange = useCallback((e) => {
+    const value = e.target.value;
+    setSearchInput(value);
     
-    // Clear existing timeout
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
+    // Call the parent handler for debounced API call
+    if (onFiltersChange) {
+      onFiltersChange({ search: value });
     }
-    
-    // Set new timeout for debounced search
-    const newTimeout = setTimeout(() => {
-      if (onFiltersChange) {
-        onFiltersChange({ search: searchValue });
-      }
-    }, 300); // 300ms debounce
-    
-    setSearchTimeout(newTimeout);
-  }, [searchTimeout, onFiltersChange]);
+  }, [onFiltersChange]);
 
-  // Immediate filter handlers (no debouncing needed)
-  const handleFilterChange = (key, value) => {
-    const newFilters = { ...localFilters, [key]: value };
-    setLocalFilters(newFilters);
-    
+  // Handle filter changes (immediate API calls for dropdowns)
+  const handleFilterChange = useCallback((key, value) => {
+    console.log('FilterBar: Filter change:', key, value);
     if (onFiltersChange) {
       onFiltersChange({ [key]: value });
     }
-  };
+  }, [onFiltersChange]);
 
-  // Tag management
-  const handleTagToggle = (tag) => {
-    const newTags = localFilters.tags.includes(tag)
-      ? localFilters.tags.filter(t => t !== tag)
-      : [...localFilters.tags, tag];
+  // Handle tag toggles
+  const handleTagToggle = useCallback((tag) => {
+    const currentTags = filters.tags || [];
+    const newTags = currentTags.includes(tag)
+      ? currentTags.filter(t => t !== tag)
+      : [...currentTags, tag];
     
     handleFilterChange('tags', newTags);
-  };
+  }, [filters.tags, handleFilterChange]);
 
-  const handleTagRemove = (tagToRemove) => {
-    const newTags = localFilters.tags.filter(tag => tag !== tagToRemove);
+  // Handle tag removal
+  const handleTagRemove = useCallback((tagToRemove) => {
+    const currentTags = filters.tags || [];
+    const newTags = currentTags.filter(tag => tag !== tagToRemove);
     handleFilterChange('tags', newTags);
-  };
+  }, [filters.tags, handleFilterChange]);
 
-  // Sort handling
-  const handleSortChange = (sortBy) => {
+  // Handle sort changes
+  const handleSortChange = useCallback((sortBy) => {
     let sortOrder = 'desc';
     
     // Toggle sort order if clicking same field
-    if (localFilters.sortBy === sortBy) {
-      sortOrder = localFilters.sortOrder === 'desc' ? 'asc' : 'desc';
+    if (filters.sortBy === sortBy) {
+      sortOrder = filters.sortOrder === 'desc' ? 'asc' : 'desc';
     }
-    
-    const newSort = { sortBy, sortOrder };
-    setLocalFilters(prev => ({ ...prev, ...newSort }));
     
     if (onFiltersChange) {
-      onFiltersChange(newSort);
+      onFiltersChange({ sortBy, sortOrder });
     }
-  };
+  }, [filters.sortBy, filters.sortOrder, onFiltersChange]);
 
   // Clear all filters
-  const handleClearAll = () => {
-    const clearedFilters = {
-      search: '',
-      status: '',
-      priority: '',
-      tags: [],
-      overdue: false,
-      sortBy: 'updatedAt',
-      sortOrder: 'desc'
-    };
-    
-    setLocalFilters(clearedFilters);
-    
+  const handleClearAll = useCallback(() => {
+    setSearchInput(''); // Clear local search state
     if (onClearFilters) {
       onClearFilters();
     }
-  };
+  }, [onClearFilters]);
 
   // Check if any filters are active
-  const hasActiveFilters = localFilters.search || 
-                          localFilters.status || 
-                          localFilters.priority || 
-                          localFilters.tags.length > 0 || 
-                          localFilters.overdue;
+  const hasActiveFilters = filters.search || 
+                          filters.status || 
+                          filters.priority || 
+                          (filters.tags && filters.tags.length > 0) || 
+                          filters.overdue;
 
   // Get sort icon
   const getSortIcon = (field) => {
-    if (localFilters.sortBy !== field) return '↕️';
-    return localFilters.sortOrder === 'asc' ? '↑' : '↓';
+    if (filters.sortBy !== field) return '↕️';
+    return filters.sortOrder === 'asc' ? '↑' : '↓';
   };
 
   return (
@@ -135,15 +93,18 @@ function FilterBar({
             <input
               type="text"
               placeholder="Search tasks by title or description..."
-              value={localFilters.search}
-              onChange={(e) => handleSearchChange(e.target.value)}
+              value={searchInput}
+              onChange={handleSearchInputChange}
               className="search-input"
               disabled={loading}
             />
-            {localFilters.search && (
+            {searchInput && (
               <button
                 className="clear-search-btn"
-                onClick={() => handleSearchChange('')}
+                onClick={() => {
+                  setSearchInput('');
+                  handleFilterChange('search', '');
+                }}
                 title="Clear search"
               >
                 ✕
@@ -160,7 +121,7 @@ function FilterBar({
           <div className="filter-group">
             <label className="filter-label">Status:</label>
             <select
-              value={localFilters.status}
+              value={filters.status || ''}
               onChange={(e) => handleFilterChange('status', e.target.value)}
               className="filter-select"
               disabled={loading}
@@ -172,7 +133,7 @@ function FilterBar({
             </select>
             {taskStats && (
               <span className="filter-count">
-                ({localFilters.status ? taskStats.byStatus[localFilters.status] || 0 : taskStats.total})
+                ({filters.status ? taskStats.byStatus[filters.status] || 0 : taskStats.total})
               </span>
             )}
           </div>
@@ -181,7 +142,7 @@ function FilterBar({
           <div className="filter-group">
             <label className="filter-label">Priority:</label>
             <select
-              value={localFilters.priority}
+              value={filters.priority || ''}
               onChange={(e) => handleFilterChange('priority', e.target.value)}
               className="filter-select"
               disabled={loading}
@@ -193,7 +154,7 @@ function FilterBar({
             </select>
             {taskStats && (
               <span className="filter-count">
-                ({localFilters.priority ? taskStats.byPriority[localFilters.priority] || 0 : taskStats.total})
+                ({filters.priority ? taskStats.byPriority[filters.priority] || 0 : taskStats.total})
               </span>
             )}
           </div>
@@ -203,7 +164,7 @@ function FilterBar({
             <label className="filter-checkbox">
               <input
                 type="checkbox"
-                checked={localFilters.overdue}
+                checked={filters.overdue || false}
                 onChange={(e) => handleFilterChange('overdue', e.target.checked)}
                 disabled={loading}
               />
@@ -223,17 +184,17 @@ function FilterBar({
         <div className="filter-section tags-section">
           <div className="tags-header">
             <label className="filter-label">Filter by Tags:</label>
-            {localFilters.tags.length > 0 && (
+            {filters.tags && filters.tags.length > 0 && (
               <span className="selected-tags-count">
-                {localFilters.tags.length} selected
+                {filters.tags.length} selected
               </span>
             )}
           </div>
           
           {/* Selected Tags */}
-          {localFilters.tags.length > 0 && (
+          {filters.tags && filters.tags.length > 0 && (
             <div className="selected-tags">
-              {localFilters.tags.map(tag => (
+              {filters.tags.map(tag => (
                 <span key={tag} className="selected-tag">
                   #{tag}
                   <button
@@ -251,7 +212,7 @@ function FilterBar({
           {/* Available Tags */}
           <div className="available-tags">
             {availableTags
-              .filter(tagData => !localFilters.tags.includes(tagData.tag))
+              .filter(tagData => !filters.tags || !filters.tags.includes(tagData.tag))
               .slice(0, 10) // Limit to prevent UI overflow
               .map(tagData => (
                 <button
@@ -273,28 +234,28 @@ function FilterBar({
           <label className="filter-label">Sort by:</label>
           <div className="sort-buttons">
             <button 
-              className={`sort-btn ${localFilters.sortBy === 'updatedAt' ? 'active' : ''}`}
+              className={`sort-btn ${filters.sortBy === 'updatedAt' ? 'active' : ''}`}
               onClick={() => handleSortChange('updatedAt')}
               disabled={loading}
             >
               Updated {getSortIcon('updatedAt')}
             </button>
             <button 
-              className={`sort-btn ${localFilters.sortBy === 'priority' ? 'active' : ''}`}
+              className={`sort-btn ${filters.sortBy === 'priority' ? 'active' : ''}`}
               onClick={() => handleSortChange('priority')}
               disabled={loading}
             >
               Priority {getSortIcon('priority')}
             </button>
             <button 
-              className={`sort-btn ${localFilters.sortBy === 'dueDate' ? 'active' : ''}`}
+              className={`sort-btn ${filters.sortBy === 'dueDate' ? 'active' : ''}`}
               onClick={() => handleSortChange('dueDate')}
               disabled={loading}
             >
               Due Date {getSortIcon('dueDate')}
             </button>
             <button 
-              className={`sort-btn ${localFilters.sortBy === 'title' ? 'active' : ''}`}
+              className={`sort-btn ${filters.sortBy === 'title' ? 'active' : ''}`}
               onClick={() => handleSortChange('title')}
               disabled={loading}
             >
@@ -320,11 +281,11 @@ function FilterBar({
             {hasActiveFilters && (
               <span className="active-filters-text">
                 {[
-                  localFilters.search && 'Search',
-                  localFilters.status && 'Status',
-                  localFilters.priority && 'Priority', 
-                  localFilters.tags.length && 'Tags',
-                  localFilters.overdue && 'Overdue'
+                  filters.search && 'Search',
+                  filters.status && 'Status',
+                  filters.priority && 'Priority', 
+                  filters.tags && filters.tags.length && 'Tags',
+                  filters.overdue && 'Overdue'
                 ].filter(Boolean).join(', ')} active
               </span>
             )}
