@@ -170,11 +170,18 @@ function AppContent() {
 
     console.log('Confirming task deletion:', deleteConfirm.id);
     try {
+      // Log the task details for debugging
+      console.log('Task to delete:', deleteConfirm);
+      console.log('Task ID type:', typeof deleteConfirm.id);
+      console.log('Task ID value:', deleteConfirm.id);
+      
       await deleteTask(deleteConfirm.id);
       setDeleteConfirm(null);
       console.log('Task deleted successfully');
     } catch (error) {
       console.error('Failed to delete task:', error);
+      // Show error message to user but don't close modal
+      alert(`Failed to delete task: ${error.message}`);
     }
   }, [deleteConfirm, deleteTask]);
 
@@ -210,148 +217,206 @@ function AppContent() {
 
   return (
     <div className="App">
-      {/* Header */}
-      <header className="App-header">
-        <div className="header-content">
-          <div className="header-main">
-            <h1>Task Management System</h1>
-            <p>Professional task tracking and workflow management</p>
-          </div>
-          
-          <div className="header-controls">
-            <button 
-              className="btn btn-primary"
-              onClick={handleCreateTask}
-            >
-              + New Task
-            </button>
+      <div className="App-content">
+        {/* Header */}
+        <header className="App-header">
+          <div className="header-content">
+            <div className="header-main">
+              <h1>Task Management System</h1>
+              <p>Professional task tracking and workflow management</p>
+            </div>
             
-            <button
-              className="btn btn-secondary"
-              onClick={handleRefreshData}
-              disabled={loading}
-              title="Refresh data"
-            >
-              ↻ Refresh
-            </button>
-            
-            <div className="dashboard-toggle">
-              <label>View: </label>
-              <select 
-                value={dashboardMode} 
-                onChange={(e) => setDashboardMode(e.target.value)}
-                className="dashboard-select"
+            <div className="header-controls">
+              <button 
+                className="btn btn-primary"
+                onClick={handleCreateTask}
               >
-                <option value="full">Full Dashboard</option>
-                <option value="compact">Compact</option>
-                <option value="hidden">Tasks Only</option>
-              </select>
+                + New Task
+              </button>
+              
+              <button
+                className="btn btn-secondary"
+                onClick={handleRefreshData}
+                disabled={loading}
+                title="Refresh data"
+              >
+                ↻ Refresh
+              </button>
+              
+              <div className="dashboard-toggle">
+                <label>View: </label>
+                <select 
+                  value={dashboardMode} 
+                  onChange={(e) => setDashboardMode(e.target.value)}
+                  className="dashboard-select"
+                >
+                  <option value="full">Full Dashboard</option>
+                  <option value="compact">Compact</option>
+                  <option value="hidden">Tasks Only</option>
+                </select>
+              </div>
             </div>
           </div>
-        </div>
-        
-        {/* System Status */}
-        <div className="status-section">
-          <div className="status-info">
-            <span>Frontend: Active</span>
-            <span>API: {backendStatus}</span>
-            <span>Mode: {import.meta.env.MODE}</span>
-            {stats && <span>Total Tasks: {stats.total}</span>}
-            <span>Status: {loading ? 'Loading' : 'Ready'}</span>
-          </div>
-        </div>
-
-        {/* Global Error Display */}
-        {error && (
-          <div className="error-banner">
-            <p>Error: {error}</p>
-            <button onClick={clearError}>Dismiss</button>
-          </div>
-        )}
-
-        {/* Global Loading State */}
-        {loading && tasks.length === 0 && (
-          <div className="loading-banner">
-            <p>Loading tasks...</p>
-          </div>
-        )}
-      </header>
-
-      {/* Dashboard */}
-      {dashboardMode !== 'hidden' && (
-        <Dashboard
-          stats={stats}
-          tasks={tasks}
-          loading={loading && !stats}
-          onFilterChange={handleDashboardFilterChange}
-          compactMode={dashboardMode === 'compact'}
-        />
-      )}
-
-      {/* Main Content */}
-      <main className="App-main">
-        {/* Filter Bar */}
-        <FilterBar
-          filters={contextFilters}
-          onFiltersChange={handleFiltersChange}
-          taskStats={stats}
-          availableTags={getAvailableTags()}
-          loading={false}
-          onClearFilters={handleClearAllFilters}
-        />
-
-        {/* Task List */}
-        <div className="tasks-section">
-          <div className="tasks-header">
-            <h3>
-              Tasks 
-              {contextFilters?.search && ` - Search: "${contextFilters.search}"`}
-              {contextFilters?.status && ` - Status: ${contextFilters.status}`}
-              {contextFilters?.priority && ` - Priority: ${contextFilters.priority}`}
-              {contextFilters?.overdue && ` - Overdue Items`}
-            </h3>
-            
-            {/* Active Filters Summary */}
-            {(contextFilters?.search || contextFilters?.status || contextFilters?.priority || 
-              contextFilters?.tags?.length > 0 || contextFilters?.overdue) && (
-              <div className="active-filters-summary">
-                <span className="filters-label">Active filters:</span>
-                {contextFilters.search && (
-                  <span className="filter-tag">Search: "{contextFilters.search}"</span>
-                )}
-                {contextFilters.status && (
-                  <span className="filter-tag">Status: {contextFilters.status}</span>
-                )}
-                {contextFilters.priority && (
-                  <span className="filter-tag">Priority: {contextFilters.priority}</span>
-                )}
-                {contextFilters.tags?.map(tag => (
-                  <span key={tag} className="filter-tag">#{tag}</span>
-                ))}
-                {contextFilters.overdue && (
-                  <span className="filter-tag">Overdue</span>
-                )}
-              </div>
-            )}
-          </div>
           
-          <TaskList
+          {/* System Status */}
+          <div className="status-section">
+            <div className="status-info">
+              <span>Frontend: Active</span>
+              <span>API: {backendStatus}</span>
+              <span>Mode: {import.meta.env.MODE}</span>
+              {stats && <span>Total Tasks: {stats.total}</span>}
+              <span>Status: {loading ? 'Loading' : 'Ready'}</span>
+            </div>
+          </div>
+
+          {/* Global Error Display */}
+          {error && (
+            <div className="error-banner">
+              <p>Error: {error}</p>
+              <button onClick={clearError}>Dismiss</button>
+            </div>
+          )}
+
+          {/* Global Loading State */}
+          {loading && tasks.length === 0 && (
+            <div className="loading-banner">
+              <p>Loading tasks...</p>
+            </div>
+          )}
+        </header>
+
+        {/* Dashboard */}
+        {dashboardMode !== 'hidden' && (
+          <Dashboard
+            stats={stats}
             tasks={tasks}
-            loading={loading && tasks.length === 0}
-            error={null}
-            onTaskEdit={handleEditTask}
-            onTaskDelete={handleDeleteTask}
-            onTaskStatusChange={handleTaskStatusChange}
-            onTaskSelect={handleTaskSelect}
-            selectedTaskId={selectedTask?.id}
-            emptyStateMessage={
-              contextFilters?.search || contextFilters?.status || contextFilters?.priority || contextFilters?.overdue
-                ? "No tasks match the current filters" 
-                : "No tasks found. Create your first task to get started."
-            }
+            loading={loading && !stats}
+            onFilterChange={handleDashboardFilterChange}
+            compactMode={dashboardMode === 'compact'}
           />
-        </div>
-      </main>
+        )}
+
+        {/* Main Content */}
+        <main className="App-main">
+          {/* Filter Bar */}
+          <FilterBar
+            filters={contextFilters}
+            onFiltersChange={handleFiltersChange}
+            taskStats={stats}
+            availableTags={getAvailableTags()}
+            loading={false}
+            onClearFilters={handleClearAllFilters}
+          />
+
+          {/* Task List */}
+          <div className="tasks-section">
+            <div className="tasks-header">
+              <h3>
+                Tasks 
+                {contextFilters?.search && ` - Search: "${contextFilters.search}"`}
+                {contextFilters?.status && ` - Status: ${contextFilters.status}`}
+                {contextFilters?.priority && ` - Priority: ${contextFilters.priority}`}
+                {contextFilters?.overdue && ` - Overdue Items`}
+              </h3>
+              
+              {/* Active Filters Summary */}
+              {(contextFilters?.search || contextFilters?.status || contextFilters?.priority || 
+                contextFilters?.tags?.length > 0 || contextFilters?.overdue) && (
+                <div className="active-filters-summary">
+                  <span className="filters-label">Active filters:</span>
+                  {contextFilters.search && (
+                    <span className="filter-tag">Search: "{contextFilters.search}"</span>
+                  )}
+                  {contextFilters.status && (
+                    <span className="filter-tag">Status: {contextFilters.status}</span>
+                  )}
+                  {contextFilters.priority && (
+                    <span className="filter-tag">Priority: {contextFilters.priority}</span>
+                  )}
+                  {contextFilters.tags?.map(tag => (
+                    <span key={tag} className="filter-tag">#{tag}</span>
+                  ))}
+                  {contextFilters.overdue && (
+                    <span className="filter-tag">Overdue</span>
+                  )}
+                </div>
+              )}
+            </div>
+            
+            <TaskList
+              tasks={tasks}
+              loading={loading && tasks.length === 0}
+              error={null}
+              onTaskEdit={handleEditTask}
+              onTaskDelete={handleDeleteTask}
+              onTaskStatusChange={handleTaskStatusChange}
+              onTaskSelect={handleTaskSelect}
+              selectedTaskId={selectedTask?.id}
+              emptyStateMessage={
+                contextFilters?.search || contextFilters?.status || contextFilters?.priority || contextFilters?.overdue
+                  ? "No tasks match the current filters" 
+                  : "No tasks found. Create your first task to get started."
+              }
+            />
+          </div>
+        </main>
+
+        {/* Development Footer */}
+        <footer className="app-footer">
+          <div className="development-info">
+            <h3>System Status</h3>
+            <div className="status-grid">
+              <div className="status-item">
+                <span className="status-icon">✓</span>
+                <span>Task Repository API</span>
+              </div>
+              <div className="status-item">
+                <span className="status-icon">✓</span>
+                <span>React Components</span>
+              </div>
+              <div className="status-item">
+                <span className="status-icon">✓</span>
+                <span>Advanced Filtering</span>
+              </div>
+              <div className="status-item">
+                <span className="status-icon">✓</span>
+                <span>Analytics Dashboard</span>
+              </div>
+              <div className="status-item">
+                <span className="status-icon">✓</span>
+                <span>State Management</span>
+              </div>
+              <div className="status-item">
+                <span className="status-icon">✓</span>
+                <span>CRUD Operations</span>
+              </div>
+              <div className="status-item">
+                <span className="status-icon">✓</span>
+                <span>Search & Sort</span>
+              </div>
+              <div className="status-item">
+                <span className="status-icon">✓</span>
+                <span>Mobile Responsive</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="tech-stack">
+            <h3>Technical Architecture</h3>
+            <ul>
+              <li>React 18 with Hooks</li>
+              <li>Context API + Custom Hooks</li>
+              <li>Vite Development Server</li>
+              <li>Vercel Serverless Functions</li>
+              <li>Repository Pattern</li>
+              <li>Real-time Analytics</li>
+              <li>Advanced Search & Filter</li>
+              <li>Responsive Design System</li>
+              <li>Modern UI/UX Patterns</li>
+            </ul>
+          </div>
+        </footer>
+      </div>
 
       {/* Task Form Modal */}
       {showCreateForm && (
@@ -383,6 +448,10 @@ function AppContent() {
                 {deleteConfirm.description && (
                   <p>{deleteConfirm.description}</p>
                 )}
+                {/* Debug info - remove after fixing */}
+                <small style={{color: '#ccc', fontSize: '0.8rem'}}>
+                  Task ID: {deleteConfirm.id} ({typeof deleteConfirm.id})
+                </small>
               </div>
               <p className="delete-warning">This action cannot be undone.</p>
             </div>
@@ -403,62 +472,6 @@ function AppContent() {
           </div>
         </div>
       )}
-
-      {/* Development Footer */}
-      <footer className="app-footer">
-        <div className="development-info">
-          <h3>System Status</h3>
-          <div className="status-grid">
-            <div className="status-item">
-              <span className="status-icon">✓</span>
-              <span>Task Repository API</span>
-            </div>
-            <div className="status-item">
-              <span className="status-icon">✓</span>
-              <span>React Components</span>
-            </div>
-            <div className="status-item">
-              <span className="status-icon">✓</span>
-              <span>Advanced Filtering</span>
-            </div>
-            <div className="status-item">
-              <span className="status-icon">✓</span>
-              <span>Analytics Dashboard</span>
-            </div>
-            <div className="status-item">
-              <span className="status-icon">✓</span>
-              <span>State Management</span>
-            </div>
-            <div className="status-item">
-              <span className="status-icon">✓</span>
-              <span>CRUD Operations</span>
-            </div>
-            <div className="status-item">
-              <span className="status-icon">✓</span>
-              <span>Search & Sort</span>
-            </div>
-            <div className="status-item">
-              <span className="status-icon">✓</span>
-              <span>Mobile Responsive</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="tech-stack">
-          <h3>Technical Architecture</h3>
-          <ul>
-            <li>React 18 with Hooks</li>
-            <li>Context API + Custom Hooks</li>
-            <li>Vite Development Server</li>
-            <li>Vercel Serverless Functions</li>
-            <li>Repository Pattern</li>
-            <li>Real-time Analytics</li>
-            <li>Advanced Search & Filter</li>
-            <li>Responsive Design System</li>
-            <li>Modern UI/UX Patterns</li>
-          </ul>
-        </div>
-      </footer>
     </div>
   );
 }
