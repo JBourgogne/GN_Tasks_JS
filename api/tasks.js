@@ -1,9 +1,35 @@
-// Enhanced Tasks API with TaskRepository
-import { getTaskRepository } from './data/TaskRepository.js';
+// Enhanced Tasks API with proper middleware
+import { v4 as uuidv4 } from 'uuid';
 import { setCorsHeaders, handleCorsPrelight } from './middleware/cors.js';
 import { logRequest, logResponse } from './middleware/logger.js';
 import { handleAPIError, APIError } from './middleware/errorHandler.js';
 import { parseJSONBody, validateContentType, parseQueryParams } from './middleware/parser.js';
+
+// In-memory storage (will be replaced with TaskRepository in next step)
+let tasks = [
+  { 
+    id: uuidv4(), 
+    title: 'Sample Task 1', 
+    description: 'This is a sample task',
+    status: 'todo',
+    priority: 'medium',
+    dueDate: null,
+    tags: ['sample'],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  { 
+    id: uuidv4(), 
+    title: 'Sample Task 2', 
+    description: 'Another sample task',
+    status: 'completed',
+    priority: 'high',
+    dueDate: new Date().toISOString(),
+    tags: ['sample', 'completed'],
+    createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date().toISOString()
+  }
+];
 
 export default async function handler(req, res) {
   let requestId;
@@ -23,20 +49,17 @@ export default async function handler(req, res) {
     // Validate content type for POST/PUT requests
     validateContentType(req);
 
-    // Get repository instance
-    const repository = getTaskRepository();
-
     // Route to appropriate handler
     let statusCode = 200;
     let response;
 
     switch (req.method) {
       case 'GET':
-        response = await handleGetTasks(req, repository);
+        response = await handleGetTasks(req);
         break;
         
       case 'POST':
-        response = await handleCreateTask(req, repository);
+        response = await handleCreateTask(req);
         statusCode = 201;
         break;
         
@@ -68,103 +91,43 @@ export default async function handler(req, res) {
   }
 }
 
-async function handleGetTasks(req, repository) {
+async function handleGetTasks(req) {
   const query = parseQueryParams(req);
   
-  // Validate query parameters (basic validation for now)
-  const filters = {
-    status: query.status,
-    priority: query.priority,
-    tags: query.tags,
-    search: query.search,
-    sortBy: query.sortBy || 'updatedAt',
-    sortOrder: query.sortOrder || 'desc',
-    limit: Math.min(parseInt(query.limit) || 50, 100),
-    offset: Math.max(parseInt(query.offset) || 0, 0),
-    overdue: query.overdue === 'true' || query.overdue === true
-  };
-
-  // Remove undefined values
-  Object.keys(filters).forEach(key => {
-    if (filters[key] === undefined) {
-      delete filters[key];
-    }
-  });
-
-  try {
-    const result = await repository.findAll(filters);
-    
-    return {
-      ...result,
-      filters: {
-        applied: filters,
-        available: {
-          status: ['todo', 'in_progress', 'completed'],
-          priority: ['low', 'medium', 'high'],
-          sortBy: ['title', 'status', 'priority', 'createdAt', 'updatedAt', 'dueDate'],
-          sortOrder: ['asc', 'desc']
-        }
-      }
-    };
-    
-  } catch (error) {
-    console.error('Error fetching tasks:', error);
-    throw new APIError('Failed to fetch tasks', 500);
+  // Basic filtering (will be enhanced with proper validation later)
+  let filteredTasks = [...tasks];
+  
+  // Filter by status
+  if (query.status) {
+    filteredTasks = filteredTasks.filter(task => task.status === query.status);
   }
+  
+  // Filter by priority
+  if (query.priority) {
+    filteredTasks = filteredTasks.filter(task => task.priority === query.priority);
+  }
+  
+  // Simple search
+  if (query.search) {
+    const searchTerm = query.search.toLowerCase();
+    filteredTasks = filteredTasks.filter(task => 
+      task.title.toLowerCase().includes(searchTerm) ||
+      task.description.toLowerCase().includes(searchTerm)
+    );
+  }
+
+  return {
+    tasks: filteredTasks,
+    total: filteredTasks.length,
+    filters: query
+  };
 }
 
-async function handleCreateTask(req, repository) {
+async function handleCreateTask(req) {
   const body = parseJSONBody(req);
   
-  // Basic validation (will be enhanced with Joi in next step)
+  // Basic validation
   if (!body.title || typeof body.title !== 'string' || body.title.trim().length === 0) {
-    throw new APIError('Title is required and must be a non-empty string', 400);
-  }
-
-  if (body.title.length > 100) {
-    throw new APIError('Title must be 100 characters or less', 400);
-  }
-
-  if (body.description && body.description.length > 500) {
-    throw new APIError('Description must be 500 characters or less', 400);
-  }
-
-  if (body.status && !['todo', 'in_progress', 'completed'].includes(body.status)) {
-    throw new APIError('Status must be one of: todo, in_progress, completed', 400);
-  }
-
-  if (body.priority && !['low', 'medium', 'high'].includes(body.priority)) {
-    throw new APIError('Priority must be one of: low, medium, high', 400);
-  }
-
-  if (body.tags && !Array.isArray(body.tags)) {
-    throw new APIError('Tags must be an array', 400);
-  }
-
-  if (body.tags && body.tags.length > 10) {
-    throw new APIError('Maximum 10 tags allowed', 400);
-  }
-
-  try {
-    const newTask = await repository.create({
-      title: body.title.trim(),
-      description: body.description?.trim() || '',
-      status: body.status || 'todo',
-      priority: body.priority || 'medium',
-      dueDate: body.dueDate || null,
-      tags: body.tags || []
-    });
-
-    return {
-      task: newTask,
-      message: 'Task created successfully'
-    };
-    
-  } catch (error) {
-    console.error('Error creating task:', error);
-    throw new APIError('Failed to create task', 500);
-  }
-}' || body.title.trim().length === 0) {
     throw new APIError('Title is required and must be a non-empty string', 400);
   }
 

@@ -1,56 +1,132 @@
 /**
- * Global error handling for API routes
+ * Request parsing middleware for Vercel serverless functions
  */
+import { APIError } from './errorHandler.js';
 
-export class APIError extends Error {
-  constructor(message, statusCode = 500, details = null) {
-    super(message);
-    this.name = 'APIError';
-    this.statusCode = statusCode;
-    this.details = details;
+/**
+ * Parse JSON body from request
+ * @param {Request} req - Request object
+ * @returns {Object} Parsed JSON body
+ */
+export function parseJSONBody(req) {
+  // In Vercel serverless functions, req.body is already parsed
+  if (req.body && typeof req.body === 'object') {
+    return req.body;
   }
-}
-
-export function createErrorResponse(error, requestId = null) {
-  const isProduction = process.env.NODE_ENV === 'production';
   
-  const response = {
-    success: false,
-    error: {
-      message: error.message || 'Internal server error',
-      statusCode: error.statusCode || 500,
-      timestamp: new Date().toISOString()
+  // If body is a string, try to parse it
+  if (typeof req.body === 'string') {
+    try {
+      return JSON.parse(req.body);
+    } catch (error) {
+      throw new APIError('Invalid JSON in request body', 400);
     }
-  };
-
-  // Add request ID for tracing
-  if (requestId) {
-    response.error.requestId = requestId;
   }
-
-  // Add details for API errors
-  if (error instanceof APIError && error.details) {
-    response.error.details = error.details;
-  }
-
-  // Add stack trace in development
-  if (!isProduction && error.stack) {
-    response.error.stack = error.stack;
-  }
-
-  return response;
+  
+  // If no body
+  return {};
 }
 
-export function handleAPIError(res, error, requestId = null) {
-  const statusCode = error.statusCode || 500;
-  const errorResponse = createErrorResponse(error, requestId);
-  
-  // Log error details
-  console.error(`[${new Date().toISOString()}] ${requestId || 'NO_ID'} ERROR:`, {
-    message: error.message,
-    statusCode,
-    stack: error.stack
-  });
+/**
+ * Validate content type for POST/PUT requests
+ * @param {Request} req - Request object
+ */
+export function validateContentType(req) {
+  if (req.method === 'POST' || req.method === 'PUT') {
+    const contentType = req.headers['content-type'] || '';
+    
+    if (!contentType.includes('application/json')) {
+      throw new APIError('Content-Type must be application/json', 400, {
+        received: contentType,
+        expected: 'application/json'
+      });
+    }
+  }
+}
 
-  res.status(statusCode).json(errorResponse);
+/**
+ * Parse query parameters with type conversion
+ * @param {Request} req - Request object
+ * @returns {Object} Parsed query parameters
+ */
+export function parseQueryParams(req) {
+  const query = req.query || {};
+  
+  // Convert URL object to plain object if needed
+  if (query instanceof URL) {
+    const params = {};
+    for (const [key, value] of query.searchParams.entries()) {
+      params[key] = value;
+    }
+    return params;
+  }
+  
+  return query;
+}
+
+/**
+ * Parse and validate pagination parameters
+ * @param {Object} query - Query parameters
+ * @returns {Object} Pagination parameters
+ */
+export function parsePagination(query) {
+  const limit = Math.min(Math.max(parseInt(query.limit) || 50, 1), 100);
+  const offset = Math.max(parseInt(query.offset) || 0, 0);
+  
+  return { limit, offset };
+}
+
+/**
+ * Parse boolean query parameter
+ * @param {string|boolean} value - Value to parse
+ * @returns {boolean|undefined} Parsed boolean or undefined
+ */
+export function parseBoolean(value) {
+  if (value === undefined || value === null || value === '') {
+    return undefined;
+  }
+  
+  if (typeof value === 'boolean') {
+    return value;
+  }
+  
+  if (typeof value === 'string') {
+    return value.toLowerCase() === 'true';
+  }
+  
+  return undefined;
+}
+
+/**
+ * Parse array from comma-separated string
+ * @param {string|Array} value - Value to parse
+ * @returns {Array} Parsed array
+ */
+export function parseArray(value) {
+  if (Array.isArray(value)) {
+    return value;
+  }
+  
+  if (typeof value === 'string' && value.trim()) {
+    return value.split(',').map(item => item.trim()).filter(Boolean);
+  }
+  
+  return [];
+}
+
+/**
+ * Sanitize string input
+ * @param {string} value - Input string
+ * @param {number} maxLength - Maximum allowed length
+ * @returns {string} Sanitized string
+ */
+export function sanitizeString(value, maxLength = 1000) {
+  if (typeof value !== 'string') {
+    return '';
+  }
+  
+  return value
+    .trim()
+    .substring(0, maxLength)
+    .replace(/[\x00-\x1F\x7F]/g, ''); // Remove control characters
 }
