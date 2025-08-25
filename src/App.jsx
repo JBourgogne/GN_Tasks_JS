@@ -29,7 +29,7 @@ function AppContent() {
   } = useTasks();
 
   // Local UI state
-  const [backendStatus, setBackendStatus] = useState('checking...');
+  const [backendStatus, setBackendStatus] = useState('Checking connection...');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [formLoading, setFormLoading] = useState(false);
@@ -43,19 +43,19 @@ function AppContent() {
     
     const initializeApp = async () => {
       try {
-        console.log('App initialization started');
+        console.log('Initializing application...');
         const data = await tasksAPI.healthCheck();
         
         if (mounted && data.success) {
-          setBackendStatus(`✅ Connected - ${data.data.status}`);
-          console.log('Backend health check successful');
+          setBackendStatus(`Connected - ${data.data.status}`);
+          console.log('Backend connection established');
         } else if (mounted) {
           throw new Error('Health check failed');
         }
       } catch (error) {
         console.error('Backend connection error:', error);
         if (mounted) {
-          setBackendStatus('❌ Backend connection failed');
+          setBackendStatus('Connection failed');
         }
       }
     };
@@ -65,21 +65,21 @@ function AppContent() {
     return () => {
       mounted = false;
     };
-  }, []); // Empty dependency array - only run once
+  }, []);
 
-  // Filter handlers - simplified
+  // Filter handlers
   const handleFiltersChange = useCallback(async (newFilters) => {
-    console.log('App: Filter change requested:', newFilters);
+    console.log('Filter update requested:', newFilters);
     await updateFilters(newFilters);
   }, [updateFilters]);
 
   const handleSearchChange = useCallback(async (searchTerm) => {
-    console.log('App: Search change requested:', searchTerm);
+    console.log('Search update requested:', searchTerm);
     await updateSearch(searchTerm);
   }, [updateSearch]);
 
   const handleClearAllFilters = useCallback(async () => {
-    console.log('App: Clear all filters requested');
+    console.log('Clearing all filters');
     const clearedFilters = {
       status: '',
       priority: '',
@@ -93,7 +93,7 @@ function AppContent() {
   }, [updateFilters]);
 
   const handleDashboardFilterChange = useCallback(async (filterChange) => {
-    console.log('App: Dashboard filter change:', filterChange);
+    console.log('Dashboard filter update:', filterChange);
     await updateFilters({
       ...contextFilters,
       ...filterChange
@@ -102,44 +102,44 @@ function AppContent() {
 
   // Task form handlers
   const handleCreateTask = useCallback(() => {
-    console.log('App: Create task button clicked');
+    console.log('Opening task creation form');
     setShowCreateForm(true);
     setEditingTask(null);
     setFormError(null);
   }, []);
 
   const handleEditTask = useCallback((task) => {
-    console.log('App: Edit task requested:', task.id);
+    console.log('Opening task edit form:', task.id);
     setEditingTask(task);
     setShowCreateForm(true);
     setFormError(null);
   }, []);
 
   const handleCloseForm = useCallback(() => {
-    console.log('App: Form close requested');
+    console.log('Closing task form');
     setShowCreateForm(false);
     setEditingTask(null);
     setFormError(null);
   }, []);
 
   const handleFormSubmit = useCallback(async (taskData) => {
-    console.log('App: Form submit requested:', taskData);
+    console.log('Processing form submission:', taskData);
     setFormLoading(true);
     setFormError(null);
 
     try {
       if (editingTask) {
         await updateTask(editingTask.id, taskData);
-        console.log('App: Task updated successfully');
+        console.log('Task updated successfully');
       } else {
         await createTask(taskData);
-        console.log('App: Task created successfully');
+        console.log('Task created successfully');
       }
       
       // Close form on success
       handleCloseForm();
     } catch (error) {
-      console.error('App: Form submit error:', error);
+      console.error('Form submission error:', error);
       setFormError(error.message);
     } finally {
       setFormLoading(false);
@@ -148,7 +148,7 @@ function AppContent() {
 
   // Task action handlers
   const handleTaskStatusChange = useCallback(async (taskId, newStatus) => {
-    console.log('App: Task status change:', taskId, newStatus);
+    console.log('Updating task status:', taskId, newStatus);
     try {
       await updateTask(taskId, { status: newStatus });
     } catch (error) {
@@ -161,44 +161,44 @@ function AppContent() {
   }, [selectTask]);
 
   const handleDeleteTask = useCallback((task) => {
-    console.log('App: Delete task requested:', task.id);
+    console.log('Requesting task deletion:', task.id);
     setDeleteConfirm(task);
   }, []);
 
   const confirmDelete = useCallback(async () => {
     if (!deleteConfirm) return;
 
-    console.log('App: Confirming delete for:', deleteConfirm.id);
+    console.log('Confirming task deletion:', deleteConfirm.id);
     try {
       await deleteTask(deleteConfirm.id);
       setDeleteConfirm(null);
-      console.log('App: Task deleted successfully');
+      console.log('Task deleted successfully');
     } catch (error) {
       console.error('Failed to delete task:', error);
     }
   }, [deleteConfirm, deleteTask]);
 
   const cancelDelete = useCallback(() => {
-    console.log('App: Delete cancelled');
+    console.log('Task deletion cancelled');
     setDeleteConfirm(null);
   }, []);
 
   // Manual refresh
   const handleRefreshData = useCallback(async () => {
-    console.log('App: Manual refresh requested');
+    console.log('Manual data refresh initiated');
     try {
       // Check backend status
       const healthData = await tasksAPI.healthCheck();
       if (healthData.success) {
-        setBackendStatus(`✅ Connected - ${healthData.data.status}`);
+        setBackendStatus(`Connected - ${healthData.data.status}`);
       }
       
       // Refresh data
       await Promise.all([loadTasks(), loadStats()]);
-      console.log('App: Manual refresh completed');
+      console.log('Data refresh completed');
     } catch (error) {
-      console.error('App: Manual refresh error:', error);
-      setBackendStatus('❌ Backend connection failed');
+      console.error('Data refresh error:', error);
+      setBackendStatus('Connection failed');
     }
   }, [loadTasks, loadStats]);
 
@@ -214,38 +214,37 @@ function AppContent() {
       <header className="App-header">
         <div className="header-content">
           <div className="header-main">
-            <h1>🚀 Task Management App</h1>
-            <p>Full-stack React + Express application with modern task management</p>
+            <h1>Task Management System</h1>
+            <p>Professional task tracking and workflow management</p>
           </div>
           
           <div className="header-controls">
             <button 
               className="btn btn-primary"
               onClick={handleCreateTask}
-              // Removed disabled={loading} to prevent stuck state
             >
-              ✨ Create New Task
+              + New Task
             </button>
             
             <button
               className="btn btn-secondary"
               onClick={handleRefreshData}
               disabled={loading}
-              title="Refresh all data"
+              title="Refresh data"
             >
-              🔄 Refresh
+              ↻ Refresh
             </button>
             
             <div className="dashboard-toggle">
-              <label>Dashboard: </label>
+              <label>View: </label>
               <select 
                 value={dashboardMode} 
                 onChange={(e) => setDashboardMode(e.target.value)}
                 className="dashboard-select"
               >
-                <option value="full">Full</option>
+                <option value="full">Full Dashboard</option>
                 <option value="compact">Compact</option>
-                <option value="hidden">Hidden</option>
+                <option value="hidden">Tasks Only</option>
               </select>
             </div>
           </div>
@@ -254,26 +253,26 @@ function AppContent() {
         {/* System Status */}
         <div className="status-section">
           <div className="status-info">
-            <span>Frontend: ✅ React + Vite</span>
-            <span>Backend: {backendStatus}</span>
-            <span>Environment: {import.meta.env.MODE}</span>
-            {stats && <span>Tasks: {stats.total} total</span>}
-            <span>Loading: {loading ? 'Yes' : 'No'}</span>
+            <span>Frontend: Active</span>
+            <span>API: {backendStatus}</span>
+            <span>Mode: {import.meta.env.MODE}</span>
+            {stats && <span>Total Tasks: {stats.total}</span>}
+            <span>Status: {loading ? 'Loading' : 'Ready'}</span>
           </div>
         </div>
 
         {/* Global Error Display */}
         {error && (
           <div className="error-banner">
-            <p>❌ {error}</p>
+            <p>Error: {error}</p>
             <button onClick={clearError}>Dismiss</button>
           </div>
         )}
 
-        {/* Global Loading State - Only show for initial load */}
+        {/* Global Loading State */}
         {loading && tasks.length === 0 && (
           <div className="loading-banner">
-            <p>⏳ Loading tasks...</p>
+            <p>Loading tasks...</p>
           </div>
         )}
       </header>
@@ -297,7 +296,7 @@ function AppContent() {
           onFiltersChange={handleFiltersChange}
           taskStats={stats}
           availableTags={getAvailableTags()}
-          loading={false} // Don't disable filter bar during loading
+          loading={false}
           onClearFilters={handleClearAllFilters}
         />
 
@@ -305,11 +304,11 @@ function AppContent() {
         <div className="tasks-section">
           <div className="tasks-header">
             <h3>
-              📝 Tasks 
+              Tasks 
               {contextFilters?.search && ` - Search: "${contextFilters.search}"`}
               {contextFilters?.status && ` - Status: ${contextFilters.status}`}
               {contextFilters?.priority && ` - Priority: ${contextFilters.priority}`}
-              {contextFilters?.overdue && ` - Overdue Only`}
+              {contextFilters?.overdue && ` - Overdue Items`}
             </h3>
             
             {/* Active Filters Summary */}
@@ -338,8 +337,8 @@ function AppContent() {
           
           <TaskList
             tasks={tasks}
-            loading={loading && tasks.length === 0} // Only show loading for initial load
-            error={null} // Errors are handled globally
+            loading={loading && tasks.length === 0}
+            error={null}
             onTaskEdit={handleEditTask}
             onTaskDelete={handleDeleteTask}
             onTaskStatusChange={handleTaskStatusChange}
@@ -347,8 +346,8 @@ function AppContent() {
             selectedTaskId={selectedTask?.id}
             emptyStateMessage={
               contextFilters?.search || contextFilters?.status || contextFilters?.priority || contextFilters?.overdue
-                ? "No tasks match your current filters" 
-                : "No tasks yet. Create your first task to get started!"
+                ? "No tasks match the current filters" 
+                : "No tasks found. Create your first task to get started."
             }
           />
         </div>
@@ -375,7 +374,7 @@ function AppContent() {
         <div className="modal-overlay" onClick={cancelDelete}>
           <div className="modal-content delete-modal" onClick={(e) => e.stopPropagation()}>
             <div className="delete-modal-header">
-              <h3>🗑️ Delete Task</h3>
+              <h3>Delete Task</h3>
             </div>
             <div className="delete-modal-body">
               <p>Are you sure you want to delete this task?</p>
@@ -408,55 +407,55 @@ function AppContent() {
       {/* Development Footer */}
       <footer className="app-footer">
         <div className="development-info">
-          <h3>🔧 Development Status</h3>
+          <h3>System Status</h3>
           <div className="status-grid">
             <div className="status-item">
-              <span className="status-icon">✅</span>
-              <span>Backend API with TaskRepository</span>
+              <span className="status-icon">✓</span>
+              <span>Task Repository API</span>
             </div>
             <div className="status-item">
-              <span className="status-icon">✅</span>
-              <span>React Components (TaskList, TaskForm, TaskItem)</span>
+              <span className="status-icon">✓</span>
+              <span>React Components</span>
             </div>
             <div className="status-item">
-              <span className="status-icon">✅</span>
-              <span>Advanced FilterBar with Search</span>
+              <span className="status-icon">✓</span>
+              <span>Advanced Filtering</span>
             </div>
             <div className="status-item">
-              <span className="status-icon">✅</span>
-              <span>Interactive Dashboard & Statistics</span>
+              <span className="status-icon">✓</span>
+              <span>Analytics Dashboard</span>
             </div>
             <div className="status-item">
-              <span className="status-icon">✅</span>
-              <span>Context API State Management</span>
+              <span className="status-icon">✓</span>
+              <span>State Management</span>
             </div>
             <div className="status-item">
-              <span className="status-icon">✅</span>
-              <span>Full CRUD Operations</span>
+              <span className="status-icon">✓</span>
+              <span>CRUD Operations</span>
             </div>
             <div className="status-item">
-              <span className="status-icon">✅</span>
-              <span>Filtering, Search & Sorting</span>
+              <span className="status-icon">✓</span>
+              <span>Search & Sort</span>
             </div>
             <div className="status-item">
-              <span className="status-icon">✅</span>
-              <span>Responsive Design</span>
+              <span className="status-icon">✓</span>
+              <span>Mobile Responsive</span>
             </div>
           </div>
         </div>
 
         <div className="tech-stack">
-          <h3>⚡ Tech Stack Completed</h3>
+          <h3>Technical Architecture</h3>
           <ul>
-            <li>⚛️ React 18 with Hooks</li>
-            <li>🎯 Context API + Custom Hooks</li>
-            <li>⚡ Vite Build Tool</li>
-            <li>🔥 Vercel Serverless Functions</li>
-            <li>🗄️ TaskRepository Pattern</li>
-            <li>📊 Interactive Dashboard</li>
-            <li>🔍 Advanced Filtering & Search</li>
-            <li>📱 Fully Responsive Design</li>
-            <li>🎨 Modern UI/UX with Animations</li>
+            <li>React 18 with Hooks</li>
+            <li>Context API + Custom Hooks</li>
+            <li>Vite Development Server</li>
+            <li>Vercel Serverless Functions</li>
+            <li>Repository Pattern</li>
+            <li>Real-time Analytics</li>
+            <li>Advanced Search & Filter</li>
+            <li>Responsive Design System</li>
+            <li>Modern UI/UX Patterns</li>
           </ul>
         </div>
       </footer>

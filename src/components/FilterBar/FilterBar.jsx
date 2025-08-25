@@ -79,7 +79,7 @@ function FilterBar({
 
   // Get sort icon
   const getSortIcon = (field) => {
-    if (filters.sortBy !== field) return '↕️';
+    if (filters.sortBy !== field) return '↕';
     return filters.sortOrder === 'asc' ? '↑' : '↓';
   };
 
@@ -107,7 +107,7 @@ function FilterBar({
                 }}
                 title="Clear search"
               >
-                ✕
+                ×
               </button>
             )}
           </div>
@@ -127,9 +127,9 @@ function FilterBar({
               disabled={loading}
             >
               <option value="">All Status</option>
-              <option value="todo">📋 To Do</option>
-              <option value="in_progress">🔄 In Progress</option>
-              <option value="completed">✅ Completed</option>
+              <option value="todo">To Do</option>
+              <option value="in_progress">In Progress</option>
+              <option value="completed">Completed</option>
             </select>
             {taskStats && (
               <span className="filter-count">
@@ -148,9 +148,9 @@ function FilterBar({
               disabled={loading}
             >
               <option value="">All Priorities</option>
-              <option value="high">🔴 High</option>
-              <option value="medium">🟡 Medium</option>
-              <option value="low">🟢 Low</option>
+              <option value="high">High Priority</option>
+              <option value="medium">Medium Priority</option>
+              <option value="low">Low Priority</option>
             </select>
             {taskStats && (
               <span className="filter-count">
@@ -169,7 +169,7 @@ function FilterBar({
                 disabled={loading}
               />
               <span className="checkbox-label">
-                ⏰ Overdue only
+                Overdue only
                 {taskStats && taskStats.overdue > 0 && (
                   <span className="filter-count">({taskStats.overdue})</span>
                 )}
@@ -202,7 +202,7 @@ function FilterBar({
                     onClick={() => handleTagRemove(tag)}
                     title={`Remove ${tag} filter`}
                   >
-                    ✕
+                    ×
                   </button>
                 </span>
               ))}
@@ -213,7 +213,7 @@ function FilterBar({
           <div className="available-tags">
             {availableTags
               .filter(tagData => !filters.tags || !filters.tags.includes(tagData.tag))
-              .slice(0, 10) // Limit to prevent UI overflow
+              .slice(0, 10)
               .map(tagData => (
                 <button
                   key={tagData.tag}
@@ -274,7 +274,7 @@ function FilterBar({
             disabled={!hasActiveFilters || loading}
             title="Clear all filters and search"
           >
-            🗑️ Clear All
+            Clear All
           </button>
           
           <div className="active-filters-summary">

@@ -103,7 +103,7 @@ function TaskForm({
 
     // Title validation
     if (!formData.title.trim()) {
-      newErrors.title = 'Title is required';
+      newErrors.title = 'Task title is required';
     } else if (formData.title.length > 100) {
       newErrors.title = 'Title must be 100 characters or less';
     }
@@ -172,20 +172,20 @@ function TaskForm({
   return (
     <div className="task-form-container">
       <div className="task-form-header">
-        <h2>{isCreate ? '✨ Create New Task' : '✏️ Edit Task'}</h2>
+        <h2>{isCreate ? 'Create New Task' : 'Edit Task'}</h2>
         <button 
           className="close-btn"
           onClick={handleCancel}
           type="button"
           aria-label="Close form"
         >
-          ✕
+          ×
         </button>
       </div>
 
       {error && (
         <div className="form-error">
-          <p>❌ {error}</p>
+          <p>Error: {error}</p>
         </div>
       )}
 
@@ -193,7 +193,7 @@ function TaskForm({
         {/* Title Field */}
         <div className="form-group">
           <label htmlFor="title" className="form-label">
-            Title *
+            Task Title *
           </label>
           <input
             type="text"
@@ -248,15 +248,15 @@ function TaskForm({
               className="form-select"
               disabled={loading}
             >
-              <option value="todo">📋 To Do</option>
-              <option value="in_progress">🔄 In Progress</option>
-              <option value="completed">✅ Completed</option>
+              <option value="todo">To Do</option>
+              <option value="in_progress">In Progress</option>
+              <option value="completed">Completed</option>
             </select>
           </div>
 
           <div className="form-group">
             <label htmlFor="priority" className="form-label">
-              Priority
+              Priority Level
             </label>
             <select
               id="priority"
@@ -266,9 +266,9 @@ function TaskForm({
               className="form-select"
               disabled={loading}
             >
-              <option value="low">🟢 Low</option>
-              <option value="medium">🟡 Medium</option>
-              <option value="high">🔴 High</option>
+              <option value="low">Low Priority</option>
+              <option value="medium">Medium Priority</option>
+              <option value="high">High Priority</option>
             </select>
           </div>
         </div>
@@ -310,7 +310,7 @@ function TaskForm({
                     disabled={loading}
                     aria-label={`Remove ${tag} tag`}
                   >
-                    ✕
+                    ×
                   </button>
                 </span>
               ))}

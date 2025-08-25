@@ -1,34 +1,34 @@
-/* FilterBar.css */
+/* Compact FilterBar.css - Dense Layout */
 
 .filter-bar {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 16px;
-  padding: 24px;
-  margin-bottom: 24px;
+  border-radius: 12px; /* Reduced from 16px */
+  padding: 16px; /* Reduced from 24px */
+  margin-bottom: 16px; /* Reduced from 24px */
   backdrop-filter: blur(10px);
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 12px; /* Reduced from 20px */
 }
 
-/* Filter Sections */
+/* Filter Sections - Compact */
 .filter-section {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px; /* Reduced from 12px */
 }
 
 .filter-label {
   color: rgba(255, 255, 255, 0.9);
-  font-size: 0.9rem;
+  font-size: 0.8rem; /* Reduced from 0.9rem */
   font-weight: 600;
-  margin-bottom: 8px;
+  margin-bottom: 6px; /* Reduced from 8px */
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-/* Search Section */
+/* Search Section - Compact */
 .search-section {
   position: relative;
 }
@@ -41,22 +41,22 @@
 
 .search-icon {
   position: absolute;
-  left: 16px;
-  font-size: 1.1rem;
+  left: 12px; /* Reduced from 16px */
+  font-size: 1rem; /* Reduced from 1.1rem */
   color: rgba(255, 255, 255, 0.6);
   z-index: 1;
 }
 
 .search-input {
   width: 100%;
-  padding: 14px 16px 14px 48px;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
+  padding: 10px 12px 10px 36px; /* Reduced padding */
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Reduced border width */
+  border-radius: 8px; /* Reduced from 12px */
   background: rgba(255, 255, 255, 0.1);
   color: white;
-  font-size: 1rem;
+  font-size: 0.9rem; /* Reduced from 1rem */
   backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
+  transition: all 0.2s ease; /* Faster transition */
   box-sizing: border-box;
 }
 
@@ -66,25 +66,25 @@
 
 .search-input:focus {
   outline: none;
-  border-color: #4a9eff;
+  border-color: #77bc1f; /* Changed to lime green */
   background: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.1);
+  box-shadow: 0 0 0 2px rgba(119, 188, 31, 0.1); /* Reduced from 3px */
 }
 
 .clear-search-btn {
   position: absolute;
-  right: 12px;
+  right: 8px; /* Reduced from 12px */
   background: rgba(255, 255, 255, 0.2);
   border: none;
   border-radius: 50%;
-  width: 24px;
-  height: 24px;
+  width: 20px; /* Reduced from 24px */
+  height: 20px;
   color: rgba(255, 255, 255, 0.8);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.8rem;
+  font-size: 0.75rem; /* Reduced from 0.8rem */
   transition: all 0.2s ease;
 }
 
@@ -93,15 +93,15 @@
   color: white;
 }
 
-/* Controls Section */
+/* Controls Section - Compact */
 .controls-section {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 16px;
+  padding-top: 12px; /* Reduced from 16px */
 }
 
 .filter-controls {
   display: flex;
-  gap: 20px;
+  gap: 16px; /* Reduced from 20px */
   align-items: end;
   flex-wrap: wrap;
 }
@@ -109,17 +109,17 @@
 .filter-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  min-width: 140px;
+  gap: 4px; /* Reduced from 6px */
+  min-width: 120px; /* Reduced from 140px */
 }
 
 .filter-select {
-  padding: 10px 14px;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
+  padding: 8px 10px; /* Reduced from 10px 14px */
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Reduced border width */
+  border-radius: 6px; /* Reduced from 8px */
   background: rgba(255, 255, 255, 0.1);
   color: white;
-  font-size: 0.9rem;
+  font-size: 0.85rem; /* Reduced from 0.9rem */
   backdrop-filter: blur(10px);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -127,8 +127,8 @@
 
 .filter-select:focus {
   outline: none;
-  border-color: #4a9eff;
-  box-shadow: 0 0 0 2px rgba(74, 158, 255, 0.1);
+  border-color: #77bc1f; /* Changed to lime green */
+  box-shadow: 0 0 0 1px rgba(119, 188, 31, 0.1); /* Reduced from 2px */
 }
 
 .filter-select:disabled {
@@ -139,29 +139,29 @@
 .filter-select option {
   background: #333;
   color: white;
-  padding: 8px;
+  padding: 6px; /* Reduced from 8px */
 }
 
 .filter-count {
   color: rgba(255, 255, 255, 0.7);
-  font-size: 0.8rem;
-  margin-left: 8px;
+  font-size: 0.75rem; /* Reduced from 0.8rem */
+  margin-left: 6px; /* Reduced from 8px */
   font-weight: 500;
 }
 
-/* Checkbox Styling */
+/* Checkbox Styling - Compact */
 .filter-checkbox {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px; /* Reduced from 8px */
   cursor: pointer;
   color: rgba(255, 255, 255, 0.9);
 }
 
 .filter-checkbox input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  accent-color: #4a9eff;
+  width: 14px; /* Reduced from 16px */
+  height: 14px;
+  accent-color: #77bc1f; /* Changed to lime green */
   cursor: pointer;
 }
 
@@ -169,51 +169,51 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 0.9rem;
+  font-size: 0.85rem; /* Reduced from 0.9rem */
 }
 
-/* Tags Section */
+/* Tags Section - Compact */
 .tags-section {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 16px;
+  padding-top: 12px; /* Reduced from 16px */
 }
 
 .tags-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 8px; /* Reduced from 12px */
 }
 
 .selected-tags-count {
-  color: #4a9eff;
-  font-size: 0.85rem;
+  color: #77bc1f; /* Changed to lime green */
+  font-size: 0.8rem; /* Reduced from 0.85rem */
   font-weight: 600;
-  background: rgba(74, 158, 255, 0.2);
-  padding: 4px 8px;
-  border-radius: 12px;
+  background: rgba(119, 188, 31, 0.2); /* Changed to lime green */
+  padding: 3px 6px; /* Reduced from 4px 8px */
+  border-radius: 8px; /* Reduced from 12px */
 }
 
 .selected-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 12px;
-  padding: 12px;
+  gap: 6px; /* Reduced from 8px */
+  margin-bottom: 8px; /* Reduced from 12px */
+  padding: 8px; /* Reduced from 12px */
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
+  border-radius: 6px; /* Reduced from 8px */
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .selected-tag {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: #4a9eff;
+  gap: 4px; /* Reduced from 6px */
+  background: #77bc1f; /* Changed to lime green */
   color: white;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 0.85rem;
+  padding: 4px 8px; /* Reduced from 6px 12px */
+  border-radius: 12px; /* Reduced from 20px */
+  font-size: 0.8rem; /* Reduced from 0.85rem */
   font-weight: 500;
 }
 
@@ -221,14 +221,14 @@
   background: rgba(255, 255, 255, 0.3);
   border: none;
   border-radius: 50%;
-  width: 16px;
-  height: 16px;
+  width: 14px; /* Reduced from 16px */
+  height: 14px;
   color: white;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.7rem;
+  font-size: 0.65rem; /* Reduced from 0.7rem */
   transition: background 0.2s ease;
 }
 
@@ -239,43 +239,43 @@
 .available-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px; /* Reduced from 8px */
 }
 
 .available-tag {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: rgba(255, 255, 255, 0.8);
-  padding: 6px 12px;
-  border-radius: 16px;
-  font-size: 0.8rem;
+  padding: 4px 8px; /* Reduced from 6px 12px */
+  border-radius: 10px; /* Reduced from 16px */
+  font-size: 0.75rem; /* Reduced from 0.8rem */
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .available-tag:hover {
-  background: rgba(74, 158, 255, 0.2);
-  border-color: #4a9eff;
-  color: #4a9eff;
+  background: rgba(119, 188, 31, 0.2); /* Changed to lime green */
+  border-color: #77bc1f; /* Changed to lime green */
+  color: #77bc1f; /* Changed to lime green */
   transform: translateY(-1px);
 }
 
-/* Sort Section */
+/* Sort Section - Compact */
 .sort-section {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 16px;
+  padding-top: 12px; /* Reduced from 16px */
 }
 
 .sort-controls {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px; /* Reduced from 12px */
   flex-wrap: wrap;
 }
 
 .sort-buttons {
   display: flex;
-  gap: 8px;
+  gap: 6px; /* Reduced from 8px */
   flex-wrap: wrap;
 }
 
@@ -283,9 +283,9 @@
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: rgba(255, 255, 255, 0.8);
-  padding: 8px 14px;
-  border-radius: 8px;
-  font-size: 0.85rem;
+  padding: 6px 10px; /* Reduced from 8px 14px */
+  border-radius: 6px; /* Reduced from 8px */
+  font-size: 0.8rem; /* Reduced from 0.85rem */
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
@@ -297,8 +297,8 @@
 }
 
 .sort-btn.active {
-  background: #4a9eff;
-  border-color: #4a9eff;
+  background: #77bc1f; /* Changed to lime green */
+  border-color: #77bc1f; /* Changed to lime green */
   color: white;
   font-weight: 600;
 }
@@ -308,10 +308,10 @@
   cursor: not-allowed;
 }
 
-/* Actions Section */
+/* Actions Section - Compact */
 .actions-section {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 16px;
+  padding-top: 12px; /* Reduced from 16px */
 }
 
 .filter-actions {
@@ -319,22 +319,22 @@
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 12px; /* Reduced from 16px */
 }
 
 .clear-filters-btn {
   background: rgba(255, 71, 87, 0.2);
   border: 1px solid rgba(255, 71, 87, 0.4);
   color: #ff4757;
-  padding: 10px 16px;
-  border-radius: 8px;
-  font-size: 0.9rem;
+  padding: 6px 12px; /* Reduced from 10px 16px */
+  border-radius: 6px; /* Reduced from 8px */
+  font-size: 0.85rem; /* Reduced from 0.9rem */
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px; /* Reduced from 6px */
 }
 
 .clear-filters-btn:hover:not(:disabled) {
@@ -354,28 +354,28 @@
 
 .active-filters-text {
   color: rgba(255, 255, 255, 0.7);
-  font-size: 0.85rem;
+  font-size: 0.8rem; /* Reduced from 0.85rem */
   font-style: italic;
 }
 
-/* Loading State */
+/* Loading State - Compact */
 .filter-loading {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 12px;
-  background: rgba(74, 158, 255, 0.1);
-  border-radius: 8px;
-  color: #4a9eff;
-  font-size: 0.9rem;
+  gap: 6px; /* Reduced from 8px */
+  padding: 8px; /* Reduced from 12px */
+  background: rgba(119, 188, 31, 0.1); /* Changed to lime green */
+  border-radius: 6px; /* Reduced from 8px */
+  color: #77bc1f; /* Changed to lime green */
+  font-size: 0.85rem; /* Reduced from 0.9rem */
 }
 
 .loading-spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(74, 158, 255, 0.3);
-  border-top: 2px solid #4a9eff;
+  width: 14px; /* Reduced from 16px */
+  height: 14px;
+  border: 2px solid rgba(119, 188, 31, 0.3); /* Changed to lime green */
+  border-top: 2px solid #77bc1f; /* Changed to lime green */
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -385,17 +385,17 @@
   100% { transform: rotate(360deg); }
 }
 
-/* Responsive Design */
+/* Mobile-First Responsive Design */
 @media (max-width: 768px) {
   .filter-bar {
-    padding: 16px;
-    gap: 16px;
+    padding: 12px; /* Reduced for mobile */
+    gap: 10px;
   }
   
   .filter-controls {
     flex-direction: column;
     align-items: stretch;
-    gap: 16px;
+    gap: 12px; /* Reduced for mobile */
   }
   
   .filter-group {
@@ -409,6 +409,8 @@
   .sort-btn {
     flex: 1;
     min-width: 0;
+    font-size: 0.75rem; /* Smaller on mobile */
+    padding: 5px 8px; /* Reduced for mobile */
   }
   
   .filter-actions {
@@ -427,8 +429,13 @@
 }
 
 @media (max-width: 480px) {
+  .filter-bar {
+    padding: 10px; /* Further reduced */
+    gap: 8px;
+  }
+  
   .filter-controls {
-    gap: 12px;
+    gap: 10px; /* Reduced for small screens */
   }
   
   .sort-buttons {
@@ -447,9 +454,61 @@
   .selected-tags {
     justify-content: center;
   }
+
+  .filter-label {
+    font-size: 0.75rem; /* Smaller on small screens */
+  }
+
+  .search-input {
+    padding: 8px 10px 8px 32px; /* Reduced padding */
+  }
+
+  .clear-filters-btn {
+    padding: 5px 10px; /* Smaller button */
+    font-size: 0.8rem;
+  }
 }
 
-/* High contrast mode */
+/* Landscape mobile optimization */
+@media (max-width: 768px) and (orientation: landscape) {
+  .filter-controls {
+    flex-direction: row; /* Horizontal layout in landscape */
+    gap: 8px;
+  }
+  
+  .filter-group {
+    min-width: 100px; /* Smaller min-width */
+  }
+}
+
+/* Touch improvements for mobile */
+@media (hover: none) and (pointer: coarse) {
+  .sort-btn,
+  .clear-filters-btn,
+  .available-tag {
+    min-height: 36px; /* Touch-friendly height */
+    padding: 8px 12px;
+  }
+  
+  .clear-search-btn {
+    width: 24px; /* Larger touch target */
+    height: 24px;
+  }
+  
+  .remove-tag-btn {
+    width: 16px; /* Larger touch target */
+    height: 16px;
+  }
+  
+  /* Remove hover effects on touch devices */
+  .sort-btn:hover,
+  .clear-filters-btn:hover,
+  .available-tag:hover {
+    transform: none;
+  }
+}
+
+/* High contrast mode support */
 @media (prefers-contrast: high) {
   .filter-bar {
     background: rgba(255, 255, 255, 0.95);
@@ -460,15 +519,20 @@
   .filter-select {
     background: white;
     color: #000;
-    border-color: #000;
+    border-color: #77bc1f;
   }
   
   .filter-label {
     color: #000;
   }
+  
+  .sort-btn.active {
+    background: #77bc1f;
+    border: 2px solid #000;
+  }
 }
 
-/* Reduced motion */
+/* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
   .filter-bar *,
   .filter-bar *::before,
@@ -476,5 +540,25 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+  
+  .available-tag:hover,
+  .clear-filters-btn:hover {
+    transform: none;
+  }
+}
+
+/* Performance optimizations for mobile */
+@media (max-width: 768px) {
+  .sort-btn,
+  .clear-filters-btn,
+  .available-tag {
+    will-change: transform;
+  }
+  
+  /* Hardware acceleration */
+  .filter-bar {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
   }
 }
