@@ -1,4 +1,4 @@
-//TaskRepository - Abstracts task data storage
+//TaskRepository - Updated to start with just 1 sample task
 //Uses in-memory Map/Set storage that can easily be replaced with database
 import { v4 as uuidv4 } from 'uuid';
 
@@ -23,52 +23,29 @@ export class TaskRepository {
     // Tag index for fast tag searches
     this.tasksByTag = new Map();
     
-    // Initialize with sample data
+    // Initialize with single sample task
     this.initializeSampleData();
   }
 
   /**
-   * Initialize with sample data
+   * Initialize with single sample task
    * @private
    */
   initializeSampleData() {
-    const sampleTasks = [
-      {
-        id: uuidv4(),
-        title: 'Set up project infrastructure',
-        description: 'Initialize the project with proper folder structure and dependencies',
-        status: 'completed',
-        priority: 'high',
-        dueDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
-        tags: ['setup', 'infrastructure'],
-        createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-        updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
-      },
-      {
-        id: uuidv4(),
-        title: 'Implement API endpoints',
-        description: 'Create RESTful API endpoints for task management',
-        status: 'in_progress',
-        priority: 'high',
-        dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Tomorrow
-        tags: ['api', 'backend'],
-        createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-        updatedAt: new Date().toISOString()
-      },
-      {
-        id: uuidv4(),
-        title: 'Write comprehensive tests',
-        description: 'Add unit and integration tests for all components',
-        status: 'todo',
-        priority: 'medium',
-        dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days
-        tags: ['testing', 'quality'],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-    ];
+    const sampleTask = {
+      id: uuidv4(),
+      title: 'Welcome to Task Management! 👋',
+      description: 'This is a sample task to show you how the system works. You can edit, complete, or delete this task, and create new ones using the "+ New Task" button.',
+      status: 'todo',
+      priority: 'medium',
+      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 1 week from now
+      tags: ['welcome', 'demo'],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
 
-    sampleTasks.forEach(task => this._addTask(task));
+    this._addTask(sampleTask);
+    console.log('TaskRepository initialized with 1 sample task');
   }
 
   /**
@@ -152,6 +129,7 @@ export class TaskRepository {
     };
 
     this._addTask(task);
+    console.log('Created new task:', task.title);
     return { ...task }; // Return copy to prevent external modification
   }
 
@@ -269,6 +247,7 @@ export class TaskRepository {
     // Update indexes
     this._updateTask(existingTask, updatedTask);
 
+    console.log('Updated task:', updatedTask.title);
     return { ...updatedTask }; // Return copy
   }
 
@@ -284,6 +263,7 @@ export class TaskRepository {
     }
 
     this._removeTask(task);
+    console.log('Deleted task:', task.title);
     return { ...task }; // Return copy of deleted task
   }
 
@@ -342,8 +322,8 @@ export class TaskRepository {
   async clear() {
     this.tasks.clear();
     this.tasksByStatus.forEach(set => set.clear());
-    this.tasksByPriority.forEach(set => set.clear());
     this.tasksByTag.clear();
+    console.log('Cleared all tasks from repository');
   }
 
   /**
@@ -354,7 +334,7 @@ export class TaskRepository {
     return Array.from(this.tasks.values()).map(task => ({ ...task }));
   }
 
-  // Utility methods
+  // Utility methods (same as before...)
 
   /**
    * Intersect two sets efficiently

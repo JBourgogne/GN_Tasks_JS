@@ -1,34 +1,34 @@
-/* Compact FilterBar.css - Dense Layout */
+/* Ultra-Compact FilterBar.css - Maximum Mobile Density */
 
 .filter-bar {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px; /* Reduced from 16px */
-  padding: 16px; /* Reduced from 24px */
-  margin-bottom: 16px; /* Reduced from 24px */
+  border-radius: 8px; /* Reduced from 12px */
+  padding: 6px; /* Reduced from 16px */
+  margin-bottom: 8px; /* Reduced from 16px */
   backdrop-filter: blur(10px);
   display: flex;
   flex-direction: column;
-  gap: 12px; /* Reduced from 20px */
+  gap: 4px; /* Reduced from 12px */
 }
 
-/* Filter Sections - Compact */
+/* Filter Sections - Ultra Compact */
 .filter-section {
   display: flex;
   flex-direction: column;
-  gap: 8px; /* Reduced from 12px */
+  gap: 3px; /* Reduced from 8px */
 }
 
 .filter-label {
   color: rgba(255, 255, 255, 0.9);
-  font-size: 0.8rem; /* Reduced from 0.9rem */
+  font-size: 0.65rem; /* Reduced from 0.8rem */
   font-weight: 600;
-  margin-bottom: 6px; /* Reduced from 8px */
+  margin-bottom: 2px; /* Reduced from 6px */
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
 }
 
-/* Search Section - Compact */
+/* Search Section - Ultra Compact */
 .search-section {
   position: relative;
 }
@@ -41,50 +41,51 @@
 
 .search-icon {
   position: absolute;
-  left: 12px; /* Reduced from 16px */
-  font-size: 1rem; /* Reduced from 1.1rem */
+  left: 6px; /* Reduced from 12px */
+  font-size: 0.8rem; /* Reduced from 1rem */
   color: rgba(255, 255, 255, 0.6);
   z-index: 1;
 }
 
 .search-input {
   width: 100%;
-  padding: 10px 12px 10px 36px; /* Reduced padding */
-  border: 1px solid rgba(255, 255, 255, 0.2); /* Reduced border width */
-  border-radius: 8px; /* Reduced from 12px */
+  padding: 4px 6px 4px 20px; /* Reduced padding */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px; /* Reduced from 8px */
   background: rgba(255, 255, 255, 0.1);
   color: white;
-  font-size: 0.9rem; /* Reduced from 1rem */
+  font-size: 0.75rem; /* Reduced from 0.9rem */
   backdrop-filter: blur(10px);
-  transition: all 0.2s ease; /* Faster transition */
+  transition: all 0.2s ease;
   box-sizing: border-box;
 }
 
 .search-input::placeholder {
   color: rgba(255, 255, 255, 0.6);
+  font-size: 0.7rem;
 }
 
 .search-input:focus {
   outline: none;
-  border-color: #77bc1f; /* Changed to lime green */
+  border-color: #77bc1f;
   background: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 0 0 2px rgba(119, 188, 31, 0.1); /* Reduced from 3px */
+  box-shadow: 0 0 0 1px rgba(119, 188, 31, 0.1); /* Reduced from 2px */
 }
 
 .clear-search-btn {
   position: absolute;
-  right: 8px; /* Reduced from 12px */
+  right: 4px; /* Reduced from 8px */
   background: rgba(255, 255, 255, 0.2);
   border: none;
   border-radius: 50%;
-  width: 20px; /* Reduced from 24px */
-  height: 20px;
+  width: 14px; /* Reduced from 20px */
+  height: 14px;
   color: rgba(255, 255, 255, 0.8);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem; /* Reduced from 0.8rem */
+  font-size: 0.6rem; /* Reduced from 0.75rem */
   transition: all 0.2s ease;
 }
 
@@ -93,15 +94,15 @@
   color: white;
 }
 
-/* Controls Section - Compact */
+/* Controls Section - Ultra Compact */
 .controls-section {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 12px; /* Reduced from 16px */
+  padding-top: 4px; /* Reduced from 12px */
 }
 
 .filter-controls {
   display: flex;
-  gap: 16px; /* Reduced from 20px */
+  gap: 6px; /* Reduced from 16px */
   align-items: end;
   flex-wrap: wrap;
 }
@@ -109,17 +110,17 @@
 .filter-group {
   display: flex;
   flex-direction: column;
-  gap: 4px; /* Reduced from 6px */
-  min-width: 120px; /* Reduced from 140px */
+  gap: 2px; /* Reduced from 4px */
+  min-width: 60px; /* Reduced from 120px */
 }
 
 .filter-select {
-  padding: 8px 10px; /* Reduced from 10px 14px */
-  border: 1px solid rgba(255, 255, 255, 0.2); /* Reduced border width */
-  border-radius: 6px; /* Reduced from 8px */
+  padding: 3px 4px; /* Reduced from 8px 10px */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px; /* Reduced from 6px */
   background: rgba(255, 255, 255, 0.1);
   color: white;
-  font-size: 0.85rem; /* Reduced from 0.9rem */
+  font-size: 0.7rem; /* Reduced from 0.85rem */
   backdrop-filter: blur(10px);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -127,8 +128,8 @@
 
 .filter-select:focus {
   outline: none;
-  border-color: #77bc1f; /* Changed to lime green */
-  box-shadow: 0 0 0 1px rgba(119, 188, 31, 0.1); /* Reduced from 2px */
+  border-color: #77bc1f;
+  box-shadow: 0 0 0 1px rgba(119, 188, 31, 0.1);
 }
 
 .filter-select:disabled {
@@ -139,81 +140,81 @@
 .filter-select option {
   background: #333;
   color: white;
-  padding: 6px; /* Reduced from 8px */
+  padding: 2px; /* Reduced from 6px */
 }
 
 .filter-count {
   color: rgba(255, 255, 255, 0.7);
-  font-size: 0.75rem; /* Reduced from 0.8rem */
-  margin-left: 6px; /* Reduced from 8px */
+  font-size: 0.6rem; /* Reduced from 0.75rem */
+  margin-left: 3px; /* Reduced from 6px */
   font-weight: 500;
 }
 
-/* Checkbox Styling - Compact */
+/* Checkbox Styling - Ultra Compact */
 .filter-checkbox {
   display: flex;
   align-items: center;
-  gap: 6px; /* Reduced from 8px */
+  gap: 3px; /* Reduced from 6px */
   cursor: pointer;
   color: rgba(255, 255, 255, 0.9);
 }
 
 .filter-checkbox input[type="checkbox"] {
-  width: 14px; /* Reduced from 16px */
-  height: 14px;
-  accent-color: #77bc1f; /* Changed to lime green */
+  width: 10px; /* Reduced from 14px */
+  height: 10px;
+  accent-color: #77bc1f;
   cursor: pointer;
 }
 
 .checkbox-label {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 0.85rem; /* Reduced from 0.9rem */
+  gap: 2px;
+  font-size: 0.7rem; /* Reduced from 0.85rem */
 }
 
-/* Tags Section - Compact */
+/* Tags Section - Ultra Compact */
 .tags-section {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 12px; /* Reduced from 16px */
+  padding-top: 4px; /* Reduced from 12px */
 }
 
 .tags-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px; /* Reduced from 12px */
+  margin-bottom: 3px; /* Reduced from 8px */
 }
 
 .selected-tags-count {
-  color: #77bc1f; /* Changed to lime green */
-  font-size: 0.8rem; /* Reduced from 0.85rem */
+  color: #77bc1f;
+  font-size: 0.6rem; /* Reduced from 0.8rem */
   font-weight: 600;
-  background: rgba(119, 188, 31, 0.2); /* Changed to lime green */
-  padding: 3px 6px; /* Reduced from 4px 8px */
-  border-radius: 8px; /* Reduced from 12px */
+  background: rgba(119, 188, 31, 0.2);
+  padding: 1px 3px; /* Reduced from 3px 6px */
+  border-radius: 6px; /* Reduced from 8px */
 }
 
 .selected-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px; /* Reduced from 8px */
-  margin-bottom: 8px; /* Reduced from 12px */
-  padding: 8px; /* Reduced from 12px */
+  gap: 2px; /* Reduced from 6px */
+  margin-bottom: 3px; /* Reduced from 8px */
+  padding: 3px; /* Reduced from 8px */
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 6px; /* Reduced from 8px */
+  border-radius: 4px; /* Reduced from 6px */
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .selected-tag {
   display: inline-flex;
   align-items: center;
-  gap: 4px; /* Reduced from 6px */
-  background: #77bc1f; /* Changed to lime green */
+  gap: 2px; /* Reduced from 4px */
+  background: #77bc1f;
   color: white;
-  padding: 4px 8px; /* Reduced from 6px 12px */
-  border-radius: 12px; /* Reduced from 20px */
-  font-size: 0.8rem; /* Reduced from 0.85rem */
+  padding: 1px 3px; /* Reduced from 4px 8px */
+  border-radius: 8px; /* Reduced from 12px */
+  font-size: 0.6rem; /* Reduced from 0.8rem */
   font-weight: 500;
 }
 
@@ -221,14 +222,14 @@
   background: rgba(255, 255, 255, 0.3);
   border: none;
   border-radius: 50%;
-  width: 14px; /* Reduced from 16px */
-  height: 14px;
+  width: 10px; /* Reduced from 14px */
+  height: 10px;
   color: white;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.65rem; /* Reduced from 0.7rem */
+  font-size: 0.5rem; /* Reduced from 0.65rem */
   transition: background 0.2s ease;
 }
 
@@ -239,43 +240,43 @@
 .available-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px; /* Reduced from 8px */
+  gap: 2px; /* Reduced from 6px */
 }
 
 .available-tag {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: rgba(255, 255, 255, 0.8);
-  padding: 4px 8px; /* Reduced from 6px 12px */
-  border-radius: 10px; /* Reduced from 16px */
-  font-size: 0.75rem; /* Reduced from 0.8rem */
+  padding: 1px 3px; /* Reduced from 4px 8px */
+  border-radius: 6px; /* Reduced from 10px */
+  font-size: 0.6rem; /* Reduced from 0.75rem */
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .available-tag:hover {
-  background: rgba(119, 188, 31, 0.2); /* Changed to lime green */
-  border-color: #77bc1f; /* Changed to lime green */
-  color: #77bc1f; /* Changed to lime green */
-  transform: translateY(-1px);
+  background: rgba(119, 188, 31, 0.2);
+  border-color: #77bc1f;
+  color: #77bc1f;
+  transform: translateY(-0.5px); /* Reduced from -1px */
 }
 
-/* Sort Section - Compact */
+/* Sort Section - Ultra Compact */
 .sort-section {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 12px; /* Reduced from 16px */
+  padding-top: 4px; /* Reduced from 12px */
 }
 
 .sort-controls {
   display: flex;
   align-items: center;
-  gap: 8px; /* Reduced from 12px */
+  gap: 3px; /* Reduced from 8px */
   flex-wrap: wrap;
 }
 
 .sort-buttons {
   display: flex;
-  gap: 6px; /* Reduced from 8px */
+  gap: 2px; /* Reduced from 6px */
   flex-wrap: wrap;
 }
 
@@ -283,9 +284,9 @@
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: rgba(255, 255, 255, 0.8);
-  padding: 6px 10px; /* Reduced from 8px 14px */
-  border-radius: 6px; /* Reduced from 8px */
-  font-size: 0.8rem; /* Reduced from 0.85rem */
+  padding: 2px 4px; /* Reduced from 6px 10px */
+  border-radius: 4px; /* Reduced from 6px */
+  font-size: 0.6rem; /* Reduced from 0.8rem */
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
@@ -297,8 +298,8 @@
 }
 
 .sort-btn.active {
-  background: #77bc1f; /* Changed to lime green */
-  border-color: #77bc1f; /* Changed to lime green */
+  background: #77bc1f;
+  border-color: #77bc1f;
   color: white;
   font-weight: 600;
 }
@@ -308,10 +309,10 @@
   cursor: not-allowed;
 }
 
-/* Actions Section - Compact */
+/* Actions Section - Ultra Compact */
 .actions-section {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 12px; /* Reduced from 16px */
+  padding-top: 4px; /* Reduced from 12px */
 }
 
 .filter-actions {
@@ -319,27 +320,27 @@
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 12px; /* Reduced from 16px */
+  gap: 4px; /* Reduced from 12px */
 }
 
 .clear-filters-btn {
   background: rgba(255, 71, 87, 0.2);
   border: 1px solid rgba(255, 71, 87, 0.4);
   color: #ff4757;
-  padding: 6px 12px; /* Reduced from 10px 16px */
-  border-radius: 6px; /* Reduced from 8px */
-  font-size: 0.85rem; /* Reduced from 0.9rem */
+  padding: 3px 6px; /* Reduced from 6px 12px */
+  border-radius: 4px; /* Reduced from 6px */
+  font-size: 0.65rem; /* Reduced from 0.85rem */
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
-  gap: 4px; /* Reduced from 6px */
+  gap: 2px; /* Reduced from 4px */
 }
 
 .clear-filters-btn:hover:not(:disabled) {
   background: rgba(255, 71, 87, 0.3);
-  transform: translateY(-1px);
+  transform: translateY(-0.5px); /* Reduced from -1px */
 }
 
 .clear-filters-btn:disabled {
@@ -354,28 +355,28 @@
 
 .active-filters-text {
   color: rgba(255, 255, 255, 0.7);
-  font-size: 0.8rem; /* Reduced from 0.85rem */
+  font-size: 0.65rem; /* Reduced from 0.8rem */
   font-style: italic;
 }
 
-/* Loading State - Compact */
+/* Loading State - Ultra Compact */
 .filter-loading {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px; /* Reduced from 8px */
-  padding: 8px; /* Reduced from 12px */
-  background: rgba(119, 188, 31, 0.1); /* Changed to lime green */
-  border-radius: 6px; /* Reduced from 8px */
-  color: #77bc1f; /* Changed to lime green */
-  font-size: 0.85rem; /* Reduced from 0.9rem */
+  gap: 3px; /* Reduced from 6px */
+  padding: 4px; /* Reduced from 8px */
+  background: rgba(119, 188, 31, 0.1);
+  border-radius: 4px; /* Reduced from 6px */
+  color: #77bc1f;
+  font-size: 0.7rem; /* Reduced from 0.85rem */
 }
 
 .loading-spinner {
-  width: 14px; /* Reduced from 16px */
-  height: 14px;
-  border: 2px solid rgba(119, 188, 31, 0.3); /* Changed to lime green */
-  border-top: 2px solid #77bc1f; /* Changed to lime green */
+  width: 10px; /* Reduced from 14px */
+  height: 10px;
+  border: 1px solid rgba(119, 188, 31, 0.3); /* Thinner border */
+  border-top: 1px solid #77bc1f;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -385,17 +386,17 @@
   100% { transform: rotate(360deg); }
 }
 
-/* Mobile-First Responsive Design */
+/* Ultra-Mobile Responsive Design */
 @media (max-width: 768px) {
   .filter-bar {
-    padding: 12px; /* Reduced for mobile */
-    gap: 10px;
+    padding: 4px; /* Further reduced for mobile */
+    gap: 3px;
   }
   
   .filter-controls {
     flex-direction: column;
     align-items: stretch;
-    gap: 12px; /* Reduced for mobile */
+    gap: 4px;
   }
   
   .filter-group {
@@ -409,8 +410,8 @@
   .sort-btn {
     flex: 1;
     min-width: 0;
-    font-size: 0.75rem; /* Smaller on mobile */
-    padding: 5px 8px; /* Reduced for mobile */
+    font-size: 0.55rem; /* Even smaller on mobile */
+    padding: 2px 3px;
   }
   
   .filter-actions {
@@ -425,17 +426,22 @@
   
   .search-input {
     font-size: 16px; /* Prevent zoom on iOS */
+    padding: 4px 5px 4px 18px; /* Smaller padding */
+  }
+  
+  .filter-label {
+    font-size: 0.6rem;
   }
 }
 
 @media (max-width: 480px) {
   .filter-bar {
-    padding: 10px; /* Further reduced */
-    gap: 8px;
+    padding: 3px; /* Minimal padding */
+    gap: 2px;
   }
   
   .filter-controls {
-    gap: 10px; /* Reduced for small screens */
+    gap: 3px;
   }
   
   .sort-buttons {
@@ -449,6 +455,8 @@
   
   .available-tag {
     text-align: center;
+    padding: 2px 3px;
+    font-size: 0.55rem;
   }
   
   .selected-tags {
@@ -456,16 +464,28 @@
   }
 
   .filter-label {
-    font-size: 0.75rem; /* Smaller on small screens */
+    font-size: 0.55rem;
   }
 
   .search-input {
-    padding: 8px 10px 8px 32px; /* Reduced padding */
+    padding: 3px 4px 3px 16px; /* Even smaller */
+    font-size: 14px;
   }
 
   .clear-filters-btn {
-    padding: 5px 10px; /* Smaller button */
-    font-size: 0.8rem;
+    padding: 2px 4px; /* Minimal button */
+    font-size: 0.6rem;
+  }
+  
+  .search-icon {
+    left: 4px;
+    font-size: 0.7rem;
+  }
+  
+  .clear-search-btn {
+    width: 12px;
+    height: 12px;
+    font-size: 0.5rem;
   }
 }
 
@@ -473,11 +493,11 @@
 @media (max-width: 768px) and (orientation: landscape) {
   .filter-controls {
     flex-direction: row; /* Horizontal layout in landscape */
-    gap: 8px;
+    gap: 4px;
   }
   
   .filter-group {
-    min-width: 100px; /* Smaller min-width */
+    min-width: 50px;
   }
 }
 
@@ -486,64 +506,24 @@
   .sort-btn,
   .clear-filters-btn,
   .available-tag {
-    min-height: 36px; /* Touch-friendly height */
-    padding: 8px 12px;
+    min-height: 24px; /* Smaller touch-friendly height */
+    padding: 3px 5px;
   }
   
   .clear-search-btn {
-    width: 24px; /* Larger touch target */
-    height: 24px;
+    width: 16px; /* Slightly larger touch target */
+    height: 16px;
   }
   
   .remove-tag-btn {
-    width: 16px; /* Larger touch target */
-    height: 16px;
+    width: 12px;
+    height: 12px;
   }
   
   /* Remove hover effects on touch devices */
   .sort-btn:hover,
   .clear-filters-btn:hover,
   .available-tag:hover {
-    transform: none;
-  }
-}
-
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-  .filter-bar {
-    background: rgba(255, 255, 255, 0.95);
-    color: #000;
-  }
-  
-  .search-input,
-  .filter-select {
-    background: white;
-    color: #000;
-    border-color: #77bc1f;
-  }
-  
-  .filter-label {
-    color: #000;
-  }
-  
-  .sort-btn.active {
-    background: #77bc1f;
-    border: 2px solid #000;
-  }
-}
-
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-  .filter-bar *,
-  .filter-bar *::before,
-  .filter-bar *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-  
-  .available-tag:hover,
-  .clear-filters-btn:hover {
     transform: none;
   }
 }

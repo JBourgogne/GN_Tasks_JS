@@ -1,125 +1,63 @@
+/* Ultra-Compact App.css - Maximum Mobile Density */
+
 .App {
   text-align: center;
-  max-width: 100vw; /* Changed from 1200px to use full viewport */
+  max-width: 100vw;
   width: 100%;
   margin: 0 auto;
-  padding: 12px;
+  padding: 6px; /* Reduced from 12px */
   min-height: 100vh;
   background: linear-gradient(135deg, #77bc1f 0%, #b4d48c 50%, #ffffff 100%);
   color: white;
   box-sizing: border-box;
+  font-size: 14px; /* Base font size smaller */
 }
 
-/* Container for main content with better desktop sizing */
 .App-content {
-  max-width: 1400px; /* Larger max-width for desktop */
+  max-width: 1400px;
   margin: 0 auto;
   width: 100%;
 }
 
 .App-header {
-  padding: 20px;
-  border-radius: 12px;
+  padding: 8px; /* Heavily reduced from 20px */
+  border-radius: 8px; /* Reduced from 12px */
   color: white;
-  margin-bottom: 16px;
+  margin-bottom: 8px; /* Reduced from 16px */
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.25);
-  box-shadow: 0 4px 16px rgba(119, 188, 31, 0.2);
+  box-shadow: 0 2px 8px rgba(119, 188, 31, 0.2); /* Reduced shadow */
   max-width: 100%;
 }
 
 .App-header h1 {
-  margin: 0 0 8px 0;
-  font-size: 2rem;
+  margin: 0 0 4px 0; /* Reduced from 8px */
+  font-size: 1.3rem; /* Reduced from 2rem */
   font-weight: 700;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .App-header p {
-  margin: 0 0 16px 0;
+  margin: 0 0 6px 0; /* Reduced from 16px */
   opacity: 0.9;
-  font-size: 1rem;
+  font-size: 0.8rem; /* Reduced from 1rem */
 }
 
-/* Main Content Area - Better Desktop Layout */
+/* Main Content Area - Ultra Compact */
 .App-main {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 8px; /* Reduced from 16px */
   max-width: 100%;
 }
 
-/* Desktop-specific improvements */
-@media (min-width: 1024px) {
-  .App {
-    padding: 20px; /* More padding on desktop */
-  }
-  
-  .App-header {
-    padding: 32px; /* Restore larger padding on desktop */
-  }
-  
-  .App-header h1 {
-    font-size: 2.5rem; /* Larger title on desktop */
-  }
-  
-  .App-header p {
-    font-size: 1.1rem; /* Larger subtitle on desktop */
-    margin-bottom: 30px;
-  }
-  
-  .App-main {
-    gap: 24px; /* Larger gaps on desktop */
-  }
-  
-  /* Better desktop layout for main sections */
-  .controls-section,
-  .tasks-section,
-  .stats-section {
-    padding: 24px; /* Restore larger padding on desktop */
-  }
-  
-  /* Desktop footer layout */
-  .app-footer {
-    margin-top: 48px;
-    gap: 24px;
-  }
-  
-  .development-info, 
-  .tech-stack {
-    padding: 24px;
-  }
-}
-
-/* Large desktop screens */
-@media (min-width: 1440px) {
-  .App {
-    padding: 24px 40px; /* Even more padding on large screens */
-  }
-  
-  .App-header {
-    padding: 40px 48px;
-  }
-  
-  .App-header h1 {
-    font-size: 2.8rem;
-  }
-  
-  /* Better use of space on large screens */
-  .controls-section,
-  .tasks-section,
-  .stats-section {
-    padding: 32px;
-  }
-}
-
-/* System Status - Better Desktop Layout */
+/* System Status - Ultra Compact */
 .status-section {
   background: rgba(255, 255, 255, 0.15);
-  padding: 12px;
-  border-radius: 8px;
-  margin: 12px 0;
+  padding: 6px; /* Reduced from 12px */
+  border-radius: 6px; /* Reduced from 8px */
+  margin: 4px 0; /* Reduced from 12px */
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
@@ -127,217 +65,181 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 12px;
+  gap: 6px; /* Reduced from 12px */
   flex-wrap: wrap;
-  font-size: 0.85rem;
+  font-size: 0.7rem; /* Reduced from 0.85rem */
 }
 
-@media (min-width: 768px) {
-  .status-info {
-    gap: 16px; /* More space between status items on tablet+ */
-  }
-  
-  .status-info span {
-    padding: 8px 12px; /* Restore larger padding on tablet+ */
-    font-size: 0.9rem; /* Larger text on tablet+ */
-  }
+.status-info span {
+  color: rgba(255, 255, 255, 0.9);
+  padding: 2px 6px; /* Reduced from 6px 10px */
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px; /* Reduced from 6px */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-weight: 500;
+  font-size: 0.65rem; /* Very small text */
 }
 
-@media (min-width: 1024px) {
-  .status-section {
-    padding: 16px;
-  }
-  
-  .status-info {
-    gap: 20px; /* Even more space on desktop */
-  }
-  
-  .status-info span {
-    padding: 10px 16px; /* Even larger padding on desktop */
-    font-size: 1rem; /* Full size text on desktop */
-  }
-}
-
-/* Error and Loading States - Better Desktop */
+/* Error and Loading States - Compact */
 .error-banner, .loading-banner {
-  padding: 12px 16px;
-  border-radius: 8px;
-  margin: 12px 0;
+  padding: 6px 8px; /* Reduced from 12px 16px */
+  border-radius: 6px; /* Reduced from 8px */
+  margin: 6px 0; /* Reduced from 12px */
   backdrop-filter: blur(10px);
+  font-size: 0.8rem;
 }
 
-@media (min-width: 768px) {
-  .error-banner, .loading-banner {
-    padding: 15px 20px; /* Restore larger padding on tablet+ */
-    margin: 20px 0;
-  }
-}
-
-/* Header Controls - Better Desktop Layout */
+/* Header Controls - Ultra Compact */
 .header-content {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 16px;
-  gap: 16px;
+  margin-bottom: 6px; /* Reduced from 16px */
+  gap: 8px; /* Reduced from 16px */
 }
 
 .header-controls {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px; /* Reduced from 8px */
   flex-wrap: wrap;
 }
 
-@media (min-width: 768px) {
-  .header-content {
-    gap: 20px;
-    margin-bottom: 20px;
-  }
-  
-  .header-controls {
-    gap: 12px;
-  }
+.dashboard-toggle {
+  display: flex;
+  align-items: center;
+  gap: 3px; /* Reduced from 6px */
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.7rem; /* Reduced from 0.85rem */
 }
 
-/* Button Styles - Better Desktop Experience */
+.dashboard-select {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: white;
+  padding: 2px 4px; /* Reduced from 4px 8px */
+  border-radius: 3px; /* Reduced from 4px */
+  font-size: 0.65rem; /* Reduced from 0.8rem */
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+}
+
+/* Button Styles - Ultra Compact */
 .btn {
-  padding: 8px 16px;
+  padding: 4px 8px; /* Reduced from 8px 16px */
   border: none;
-  border-radius: 6px;
-  font-size: 0.9rem;
+  border-radius: 4px; /* Reduced from 6px */
+  font-size: 0.7rem; /* Reduced from 0.9rem */
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 3px; /* Reduced from 6px */
   text-decoration: none;
   border: 1px solid transparent;
   min-width: auto;
 }
 
-@media (min-width: 768px) {
-  .btn {
-    padding: 10px 20px; /* Restore larger padding on tablet+ */
-    font-size: 0.95rem;
-    gap: 8px;
-    min-width: 120px; /* Minimum width on larger screens */
-  }
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
-@media (min-width: 1024px) {
-  .btn {
-    padding: 12px 24px; /* Even larger on desktop */
-    font-size: 1rem;
-  }
+.btn-primary {
+  background: linear-gradient(135deg, #77bc1f, #b4d48c);
+  color: white;
+  box-shadow: 0 1px 4px rgba(119, 188, 31, 0.3); /* Reduced shadow */
 }
 
-/* Main Sections - Better Desktop Spacing */
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #6aa61c, #a0c77a);
+  transform: translateY(-0.5px); /* Reduced from -1px */
+  box-shadow: 0 2px 6px rgba(119, 188, 31, 0.4); /* Reduced shadow */
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border-color: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-0.5px);
+}
+
+/* Main Sections - Ultra Compact */
 .controls-section,
 .tasks-section,
 .stats-section {
   background: rgba(255, 255, 255, 0.15);
-  padding: 16px;
-  border-radius: 12px;
+  padding: 8px; /* Reduced from 16px */
+  border-radius: 8px; /* Reduced from 12px */
   border: 1px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(15px);
-  box-shadow: 0 4px 16px rgba(119, 188, 31, 0.1);
+  box-shadow: 0 2px 8px rgba(119, 188, 31, 0.1); /* Reduced shadow */
   max-width: 100%;
   box-sizing: border-box;
 }
 
-/* Keep mobile optimizations for small screens */
-@media (max-width: 767px) {
-  .App {
-    padding: 8px;
-  }
-  
-  .App-header {
-    padding: 16px 12px;
-  }
-  
-  .App-header h1 {
-    font-size: 1.6rem;
-  }
-  
-  .App-header p {
-    font-size: 0.9rem;
-    margin-bottom: 12px;
-  }
-  
-  .controls-section,
-  .tasks-section,
-  .stats-section {
-    padding: 12px;
-  }
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px; /* Reduced from 16px */
 }
 
-/* Ultra-wide desktop optimization */
-@media (min-width: 1920px) {
-  .App-content {
-    max-width: 1600px; /* Larger container for ultra-wide screens */
-  }
-  
-  .App {
-    padding: 32px 48px;
-  }
-  
-  .App-header {
-    padding: 48px 56px;
-  }
-  
-  .App-header h1 {
-    font-size: 3.2rem;
-  }
-  
-  .controls-section,
-  .tasks-section,
-  .stats-section {
-    padding: 40px;
-  }
+.section-header h3 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1rem; /* Reduced from 1.2rem */
+  font-weight: 600;
 }
 
-/* Tasks Section - Compact */
+/* Tasks Section - Ultra Compact */
 .tasks-header {
-  margin-bottom: 16px; /* Reduced from 20px */
-  padding-bottom: 12px; /* Reduced from 16px */
+  margin-bottom: 8px; /* Reduced from 16px */
+  padding-bottom: 6px; /* Reduced from 12px */
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .tasks-header h3 {
-  margin: 0 0 8px 0; /* Reduced from 12px */
-  color: grey;
-  font-size: 1.2rem; /* Reduced from 1.4rem */
+  margin: 0 0 4px 0; /* Reduced from 8px */
+  color: #ffffff;
+  font-size: 1rem; /* Reduced from 1.2rem */
   font-weight: 600;
 }
 
 .active-filters-summary {
   display: flex;
   align-items: center;
-  gap: 6px; /* Reduced from 8px */
+  gap: 3px; /* Reduced from 6px */
   flex-wrap: wrap;
-  margin-top: 6px; /* Reduced from 8px */
+  margin-top: 3px; /* Reduced from 6px */
 }
 
 .filters-label {
   color: rgba(255, 255, 255, 0.7);
-  font-size: 0.8rem; /* Reduced from 0.85rem */
+  font-size: 0.65rem; /* Reduced from 0.8rem */
   font-weight: 500;
 }
 
 .filter-tag {
   background: rgba(119, 188, 31, 0.8);
-  color: grey;
-  padding: 3px 6px; /* Reduced from 4px 8px */
-  border-radius: 8px; /* Reduced from 12px */
-  font-size: 0.75rem; /* Reduced from 0.8rem */
+  color: white;
+  padding: 1px 3px; /* Reduced from 3px 6px */
+  border-radius: 6px; /* Reduced from 8px */
+  font-size: 0.6rem; /* Reduced from 0.75rem */
   font-weight: 500;
   border: 1px solid rgba(180, 212, 140, 0.6);
 }
 
-/* Modal Styles - Compact */
+/* Modal Styles - More Compact */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -349,70 +251,71 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: 16px; /* Reduced from 20px */
+  padding: 8px; /* Reduced from 16px */
   backdrop-filter: blur(8px);
-  animation: modalOverlayEnter 0.2s ease-out; /* Faster animation */
+  animation: modalOverlayEnter 0.2s ease-out;
 }
 
 .modal-content {
-  max-width: 90vw;
-  max-height: 90vh;
+  max-width: 95vw;
+  max-height: 95vh;
   overflow-y: auto;
-  border-radius: 12px; /* Reduced from 16px */
-  animation: modalContentEnter 0.2s ease-out; /* Faster animation */
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5); /* Reduced shadow */
+  border-radius: 8px; /* Reduced from 12px */
+  animation: modalContentEnter 0.2s ease-out;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5); /* Reduced shadow */
 }
 
-/* Footer - Compact */
+/* Footer - Ultra Compact */
 .app-footer {
-  margin-top: 32px; /* Reduced from 48px */
+  margin-top: 16px; /* Reduced from 32px */
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px; /* Reduced from 24px */
+  gap: 8px; /* Reduced from 16px */
 }
 
 .development-info, .tech-stack {
   background: rgba(255, 255, 255, 0.15);
-  padding: 16px; /* Reduced from 24px */
-  border-radius: 12px; /* Reduced from 16px */
+  padding: 8px; /* Reduced from 16px */
+  border-radius: 8px; /* Reduced from 12px */
   border: 1px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(15px);
 }
 
 .development-info h3, .tech-stack h3 {
   margin-top: 0;
-  color: grey;
-  font-size: 1.1rem; /* Reduced from default */
+  color: white;
+  font-size: 0.9rem; /* Reduced */
+  margin-bottom: 6px; /* Reduced */
 }
 
 .status-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 8px; /* Reduced from 12px */
+  gap: 3px; /* Reduced from 8px */
   text-align: left;
 }
 
 .status-item {
   display: flex;
   align-items: center;
-  gap: 8px; /* Reduced from 12px */
-  padding: 6px 10px; /* Reduced from 8px 12px */
+  gap: 4px; /* Reduced from 8px */
+  padding: 3px 6px; /* Reduced from 6px 10px */
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 6px; /* Reduced from 8px */
+  border-radius: 4px; /* Reduced from 6px */
   border: 1px solid rgba(255, 255, 255, 0.15);
   transition: all 0.2s ease;
-  font-size: 0.9rem;
+  font-size: 0.7rem; /* Reduced from 0.9rem */
 }
 
 .status-item:hover {
   background: rgba(255, 255, 255, 0.2);
-  transform: translateX(2px); /* Reduced from 4px */
+  transform: translateX(1px); /* Reduced from 2px */
   border-color: rgba(180, 212, 140, 0.4);
 }
 
 .status-icon {
-  font-size: 1rem; /* Reduced from 1.1rem */
-  width: 18px; /* Reduced from 20px */
+  font-size: 0.8rem; /* Reduced from 1rem */
+  width: 12px; /* Reduced from 18px */
   text-align: center;
 }
 
@@ -421,196 +324,165 @@
   padding: 0;
   display: grid;
   grid-template-columns: 1fr;
-  gap: 6px; /* Reduced from 8px */
+  gap: 3px; /* Reduced from 6px */
 }
 
 .tech-stack li {
   background: rgba(255, 255, 255, 0.1);
-  padding: 8px 12px; /* Reduced from 12px 16px */
-  border-radius: 6px; /* Reduced from 8px */
+  padding: 4px 6px; /* Reduced from 8px 12px */
+  border-radius: 4px; /* Reduced from 6px */
   font-weight: 500;
   border: 1px solid rgba(255, 255, 255, 0.15);
   transition: all 0.2s ease;
-  font-size: 0.9rem;
+  font-size: 0.7rem; /* Reduced from 0.9rem */
 }
 
 .tech-stack li:hover {
   background: rgba(255, 255, 255, 0.2);
-  transform: translateX(2px); /* Reduced from 4px */
+  transform: translateX(1px); /* Reduced from 2px */
   border-color: rgba(180, 212, 140, 0.4);
 }
 
-/* Mobile-First Responsive Design */
+/* Ultra-Mobile Responsive Design */
 @media (max-width: 768px) {
   .App {
-    padding: 8px; /* Further reduced for mobile */
+    padding: 4px; /* Further reduced */
+    font-size: 13px; /* Even smaller base font */
   }
   
   .App-header {
-    padding: 16px 12px; /* Reduced for mobile */
+    padding: 6px; /* Further reduced */
   }
   
   .App-header h1 {
-    font-size: 1.6rem; /* Smaller on mobile */
+    font-size: 1.1rem; /* Smaller on mobile */
   }
   
   .App-header p {
-    font-size: 0.9rem; /* Smaller on mobile */
-    margin-bottom: 12px;
+    font-size: 0.7rem; /* Smaller on mobile */
+    margin-bottom: 4px;
   }
   
   .header-content {
     flex-direction: column;
     align-items: stretch;
     text-align: center;
-    gap: 12px; /* Reduced for mobile */
+    gap: 6px; /* Reduced */
   }
   
   .header-controls {
     justify-content: center;
     flex-wrap: wrap;
-    gap: 6px;
+    gap: 3px;
   }
   
   .status-info {
-    flex-direction: column;
-    gap: 6px; /* Reduced for mobile */
+    flex-direction: row; /* Keep horizontal but compact */
+    gap: 3px; /* Very tight spacing */
   }
   
   .status-info span {
-    padding: 4px 8px; /* Reduced for mobile */
-    font-size: 0.75rem; /* Smaller on mobile */
+    padding: 1px 3px; /* Very compact */
+    font-size: 0.6rem; /* Very small */
   }
   
   .controls-section,
   .tasks-section,
   .stats-section {
-    padding: 12px; /* Reduced for mobile */
+    padding: 6px; /* Very compact */
   }
   
   .section-header h3,
   .tasks-header h3 {
-    font-size: 1.1rem; /* Smaller on mobile */
+    font-size: 0.9rem; /* Smaller headers */
   }
   
   .app-footer {
     grid-template-columns: 1fr;
-    gap: 12px; /* Reduced for mobile */
-    margin-top: 24px; /* Reduced for mobile */
+    gap: 6px; /* Reduced */
+    margin-top: 12px; /* Reduced */
   }
   
   .modal-overlay {
-    padding: 12px; /* Reduced for mobile */
+    padding: 4px; /* Minimal padding */
   }
   
   .btn {
-    padding: 6px 12px; /* Smaller buttons on mobile */
-    font-size: 0.85rem; /* Smaller text */
-    gap: 4px;
+    padding: 3px 6px; /* Even smaller buttons */
+    font-size: 0.65rem; /* Smaller text */
+    gap: 2px;
   }
 }
 
 @media (max-width: 480px) {
   .App {
-    padding: 6px; /* Minimal padding on small screens */
+    padding: 2px; /* Minimal padding on small screens */
+    font-size: 12px; /* Smallest base font */
   }
   
   .App-header {
-    padding: 12px 8px;
+    padding: 4px;
   }
   
   .App-header h1 {
-    font-size: 1.4rem;
+    font-size: 1rem;
   }
   
   .controls-section,
   .tasks-section,
   .stats-section {
-    padding: 10px; /* Minimal padding */
+    padding: 4px; /* Minimal padding */
   }
   
   .development-info,
   .tech-stack {
-    padding: 12px; /* Minimal padding */
+    padding: 6px; /* Minimal padding */
   }
   
   .status-item,
   .tech-stack li {
-    padding: 4px 8px; /* Minimal padding */
-    font-size: 0.85rem; /* Smaller text */
+    padding: 2px 4px; /* Minimal padding */
+    font-size: 0.65rem; /* Smaller text */
   }
   
   .filter-tag {
-    padding: 2px 4px; /* Minimal padding */
-    font-size: 0.7rem; /* Smaller text */
+    padding: 1px 2px; /* Minimal padding */
+    font-size: 0.55rem; /* Very small text */
   }
   
   .btn {
-    padding: 6px 10px;
-    font-size: 0.8rem;
-    min-height: 36px; /* Touch-friendly height */
+    padding: 2px 4px;
+    font-size: 0.6rem;
+    min-height: 24px; /* Smaller touch target */
   }
 }
 
-/* Landscape mobile optimization */
+/* Landscape mobile optimization - Ultra compact */
 @media (max-width: 768px) and (orientation: landscape) {
   .App-header {
-    padding: 12px 16px; /* Reduced vertical padding */
+    padding: 4px 8px; /* Very reduced vertical padding */
   }
   
   .App-header h1 {
-    font-size: 1.5rem;
+    font-size: 1rem;
   }
   
   .App-header p {
-    margin-bottom: 8px;
+    margin-bottom: 2px;
   }
   
   .status-info {
     flex-direction: row; /* Horizontal layout in landscape */
-    gap: 8px;
-  }
-}
-
-/* Touch improvements for mobile */
-@media (hover: none) and (pointer: coarse) {
-  .btn {
-    min-height: 40px; /* Touch-friendly button height */
-    padding: 8px 12px;
-  }
-  
-  .status-item,
-  .tech-stack li {
-    min-height: 36px; /* Touch-friendly height */
-    padding: 8px 10px;
-  }
-  
-  /* Remove hover effects on touch devices */
-  .btn:hover,
-  .status-item:hover,
-  .tech-stack li:hover {
-    transform: none;
-  }
-}
-
-/* High density displays */
-@media (-webkit-min-device-pixel-ratio: 2) {
-  .App-header {
-    text-rendering: optimizeLegibility;
-  }
-  
-  .btn,
-  .status-info span {
-    text-rendering: optimizeLegibility;
+    gap: 4px;
   }
 }
 
 /* Loading Spinner - Compact */
 .spinner {
-  width: 14px; /* Reduced from 16px */
-  height: 14px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top: 2px solid white;
+  width: 10px; /* Reduced from 14px */
+  height: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.3); /* Thinner border */
+  border-top: 1px solid white;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -620,213 +492,49 @@
   100% { transform: rotate(360deg); }
 }
 
-/* Performance optimizations for mobile */
-@media (max-width: 768px) {
-  * {
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
-  }
-  
-  .modal-overlay,
-  .btn,
-  .status-item,
-  .tech-stack li {
-    will-change: transform;
-  }
-}
-
-/* Delete Modal Specific Styles */
-.delete-modal {
-  background: #ffffff;
-  color: #333;
-  max-width: 500px;
-  width: 90vw;
-}
-
-.delete-modal-header {
-  background: linear-gradient(135deg, #ff4757, #ff3838);
-  color: white;
-  padding: 20px 24px;
-  border-radius: 12px 12px 0 0;
-  text-align: center;
-}
-
-.delete-modal-header h3 {
-  margin: 0;
-  font-size: 1.3rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.delete-modal-header h3::before {
-  content: "⚠️";
-  font-size: 1.5rem;
-}
-
-.delete-modal-body {
-  padding: 24px;
-  text-align: center;
-}
-
-.delete-modal-body p {
-  margin: 0 0 20px 0;
-  font-size: 1.1rem;
-  color: #333;
-}
-
-.task-preview {
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  padding: 16px;
-  margin: 20px 0;
-  text-align: left;
-}
-
-.task-preview h4 {
-  margin: 0 0 8px 0;
-  color: #333;
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-.task-preview p {
-  margin: 0;
-  color: #666;
-  font-size: 0.95rem;
-  line-height: 1.4;
-}
-
-.task-preview small {
-  display: block;
-  margin-top: 8px;
-  padding: 8px;
-  background: #e9ecef;
-  border-radius: 4px;
-  font-family: 'Courier New', monospace;
-}
-
-.delete-warning {
-  color: #ff4757 !important;
-  font-weight: 600;
-  font-size: 0.95rem !important;
-  margin-top: 16px !important;
-}
-
-.delete-modal-actions {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  padding: 20px 24px;
-  border-top: 1px solid #e9ecef;
-  background: #f8f9fa;
-  border-radius: 0 0 12px 12px;
-}
-
-.btn-cancel {
-  background: #6c757d;
-  color: white;
-  border: 1px solid #6c757d;
-  padding: 10px 20px;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 100px;
-}
-
-.btn-cancel:hover:not(:disabled) {
-  background: #5a6268;
-  border-color: #5a6268;
-  transform: translateY(-1px);
-}
-
-.btn-danger {
-  background: linear-gradient(135deg, #ff4757, #ff3838);
-  color: white;
-  border: 1px solid #ff4757;
-  padding: 10px 20px;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 100px;
-  box-shadow: 0 2px 8px rgba(255, 71, 87, 0.3);
-}
-
-.btn-danger:hover:not(:disabled) {
-  background: linear-gradient(135deg, #ff3838, #ff2f2f);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(255, 71, 87, 0.4);
-}
-
-.btn-danger:disabled,
-.btn-cancel:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-/* Mobile responsiveness for delete modal */
-@media (max-width: 768px) {
-  .delete-modal {
-    width: 95vw;
-    max-width: none;
-  }
-  
-  .delete-modal-header,
-  .delete-modal-body,
-  .delete-modal-actions {
-    padding: 16px 20px;
-  }
-  
-  .delete-modal-actions {
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .btn-cancel,
-  .btn-danger {
-    width: 100%;
-    padding: 12px 16px;
-    min-height: 44px; /* Touch-friendly height */
-  }
-  
-  .task-preview {
+/* Desktop scaling - keep some breathing room on larger screens */
+@media (min-width: 1024px) {
+  .App {
     padding: 12px;
+    font-size: 14px;
   }
   
-  .delete-modal-header h3 {
-    font-size: 1.2rem;
+  .App-header {
+    padding: 16px;
+  }
+  
+  .App-header h1 {
+    font-size: 1.8rem;
+  }
+  
+  .App-header p {
+    font-size: 1rem;
+    margin-bottom: 12px;
+  }
+  
+  .App-main {
+    gap: 16px;
+  }
+  
+  .controls-section,
+  .tasks-section,
+  .stats-section {
+    padding: 16px;
+  }
+  
+  .btn {
+    padding: 8px 12px;
+    font-size: 0.85rem;
   }
 }
 
-@media (max-width: 480px) {
-  .delete-modal {
-    width: 98vw;
-  }
-  
-  .delete-modal-header,
-  .delete-modal-body,
-  .delete-modal-actions {
-    padding: 12px 16px;
-  }
-  
-  .delete-modal-header h3 {
-    font-size: 1.1rem;
-  }
-  
-  .task-preview small {
-    font-size: 0.7rem;
-    padding: 6px;
-  }
+/* Animation keyframes */
+@keyframes modalOverlayEnter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalContentEnter {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
 }

@@ -1,4 +1,4 @@
-/* TaskList.css */
+/* Ultra-Compact TaskList.css - Maximum Mobile Density */
 
 .task-list-container {
   width: 100%;
@@ -6,24 +6,24 @@
   margin: 0 auto;
 }
 
-/* Loading State */
+/* Loading State - Compact */
 .task-list-loading {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 60px 20px;
+  padding: 20px 10px; /* Reduced from 60px 20px */
   text-align: center;
 }
 
 .loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid rgba(255, 255, 255, 0.3);
-  border-top: 4px solid #4a9eff;
+  width: 24px; /* Reduced from 40px */
+  height: 24px;
+  border: 2px solid rgba(255, 255, 255, 0.3); /* Thinner border */
+  border-top: 2px solid #4a9eff;
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  margin-bottom: 16px;
+  margin-bottom: 8px; /* Reduced from 16px */
 }
 
 @keyframes spin {
@@ -33,17 +33,17 @@
 
 .task-list-loading p {
   color: rgba(255, 255, 255, 0.8);
-  font-size: 1.1rem;
+  font-size: 0.9rem; /* Reduced from 1.1rem */
   margin: 0;
 }
 
-/* Error State */
+/* Error State - Compact */
 .task-list-error {
   text-align: center;
-  padding: 40px 20px;
+  padding: 20px 10px; /* Reduced from 40px 20px */
   background: rgba(255, 71, 87, 0.1);
   border: 1px solid rgba(255, 71, 87, 0.3);
-  border-radius: 12px;
+  border-radius: 8px; /* Reduced from 12px */
   color: #ff4757;
 }
 
@@ -51,90 +51,91 @@
   background: #ff4757;
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
+  padding: 6px 12px; /* Reduced from 10px 20px */
+  border-radius: 6px; /* Reduced from 8px */
   font-weight: 600;
   cursor: pointer;
-  margin-top: 16px;
+  margin-top: 8px; /* Reduced from 16px */
   transition: background 0.2s ease;
+  font-size: 0.8rem;
 }
 
 .task-list-error button:hover {
   background: #ff3838;
 }
 
-/* Empty State */
+/* Empty State - Compact */
 .task-list-empty {
   text-align: center;
-  padding: 60px 20px;
+  padding: 30px 10px; /* Reduced from 60px 20px */
   color: rgba(255, 255, 255, 0.8);
 }
 
 .empty-icon {
-  font-size: 4rem;
-  margin-bottom: 20px;
+  font-size: 2.5rem; /* Reduced from 4rem */
+  margin-bottom: 12px; /* Reduced from 20px */
   opacity: 0.6;
 }
 
 .task-list-empty h3 {
-  font-size: 1.5rem;
-  margin: 0 0 12px 0;
+  font-size: 1.2rem; /* Reduced from 1.5rem */
+  margin: 0 0 8px 0; /* Reduced from 12px */
   color: #ffffff;
 }
 
 .task-list-empty p {
-  margin: 8px 0;
-  font-size: 1rem;
+  margin: 4px 0; /* Reduced from 8px */
+  font-size: 0.85rem; /* Reduced from 1rem */
   opacity: 0.8;
 }
 
-/* List Header */
+/* List Header - Ultra Compact */
 .task-list-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
-  padding: 20px;
+  margin-bottom: 8px; /* Reduced from 24px */
+  padding: 8px; /* Reduced from 20px */
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
+  border-radius: 6px; /* Reduced from 12px */
   backdrop-filter: blur(10px);
 }
 
 .task-count h3 {
   margin: 0;
   color: #ffffff;
-  font-size: 1.3rem;
+  font-size: 1rem; /* Reduced from 1.3rem */
 }
 
 .pagination-info {
   display: block;
-  font-size: 0.9rem;
+  font-size: 0.7rem; /* Reduced from 0.9rem */
   color: rgba(255, 255, 255, 0.7);
-  margin-top: 4px;
+  margin-top: 2px; /* Reduced from 4px */
 }
 
-/* Sort Controls */
+/* Sort Controls - Ultra Compact */
 .sort-controls {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 3px; /* Reduced from 8px */
   flex-wrap: wrap;
 }
 
 .sort-label {
   color: rgba(255, 255, 255, 0.8);
-  font-size: 0.9rem;
+  font-size: 0.7rem; /* Reduced from 0.9rem */
   font-weight: 500;
-  margin-right: 8px;
+  margin-right: 3px; /* Reduced from 8px */
 }
 
 .sort-btn {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: rgba(255, 255, 255, 0.8);
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-size: 0.85rem;
+  padding: 3px 5px; /* Reduced from 8px 12px */
+  border-radius: 4px; /* Reduced from 8px */
+  font-size: 0.65rem; /* Reduced from 0.85rem */
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
@@ -152,11 +153,11 @@
   font-weight: 600;
 }
 
-/* Task Groups */
+/* Task Groups - Ultra Compact */
 .task-groups {
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 8px; /* Reduced from 32px */
 }
 
 .task-group {
@@ -164,54 +165,54 @@
 }
 
 .group-title {
-  font-size: 1.2rem;
+  font-size: 0.9rem; /* Reduced from 1.2rem */
   font-weight: 600;
-  margin: 0 0 16px 0;
-  padding: 12px 16px;
-  border-radius: 8px;
+  margin: 0 0 6px 0; /* Reduced from 16px */
+  padding: 6px 8px; /* Reduced from 12px 16px */
+  border-radius: 4px; /* Reduced from 8px */
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px; /* Reduced from 8px */
 }
 
 .todo-group {
   background: rgba(108, 117, 125, 0.2);
   color: #6c757d;
-  border-left: 4px solid #6c757d;
+  border-left: 2px solid #6c757d; /* Reduced from 4px */
 }
 
 .progress-group {
   background: rgba(74, 158, 255, 0.2);
   color: #4a9eff;
-  border-left: 4px solid #4a9eff;
+  border-left: 2px solid #4a9eff; /* Reduced from 4px */
 }
 
 .completed-group {
   background: rgba(126, 211, 33, 0.2);
   color: #7ed321;
-  border-left: 4px solid #7ed321;
+  border-left: 2px solid #7ed321; /* Reduced from 4px */
 }
 
 .task-group-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 4px; /* Reduced from 12px */
 }
 
-/* Load More Section */
+/* Load More Section - Compact */
 .load-more-section {
-  margin-top: 32px;
+  margin-top: 16px; /* Reduced from 32px */
   text-align: center;
-  padding: 20px;
+  padding: 10px; /* Reduced from 20px */
 }
 
 .load-more-btn {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.3);
   color: white;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-size: 1rem;
+  padding: 8px 16px; /* Reduced from 12px 24px */
+  border-radius: 6px; /* Reduced from 8px */
+  font-size: 0.85rem; /* Reduced from 1rem */
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -219,7 +220,7 @@
 
 .load-more-btn:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px);
+  transform: translateY(-1px); /* Reduced from -2px */
 }
 
 .load-more-btn:disabled {
@@ -227,17 +228,25 @@
   cursor: not-allowed;
 }
 
-/* Responsive Design */
+/* Ultra-Mobile Responsive Design */
 @media (max-width: 768px) {
   .task-list-header {
     flex-direction: column;
     align-items: stretch;
-    gap: 16px;
-    padding: 16px;
+    gap: 8px; /* Reduced from 16px */
+    padding: 6px; /* Reduced from 16px */
   }
 
   .task-count {
     text-align: center;
+  }
+
+  .task-count h3 {
+    font-size: 0.9rem; /* Even smaller on mobile */
+  }
+
+  .pagination-info {
+    font-size: 0.65rem;
   }
 
   .sort-controls {
@@ -248,44 +257,88 @@
   .sort-label {
     width: 100%;
     text-align: center;
-    margin-bottom: 8px;
+    margin-bottom: 4px; /* Reduced from 8px */
     margin-right: 0;
+    font-size: 0.65rem;
+  }
+
+  .sort-btn {
+    font-size: 0.6rem; /* Even smaller */
+    padding: 2px 4px;
   }
 
   .task-groups {
-    gap: 24px;
+    gap: 6px; /* Further reduced */
   }
 
   .group-title {
+    font-size: 0.8rem; /* Smaller */
+    padding: 4px 6px;
+  }
+
+  .empty-icon {
+    font-size: 2rem; /* Smaller */
+  }
+
+  .task-list-empty {
+    padding: 20px 8px; /* More compact */
+  }
+
+  .task-list-empty h3 {
     font-size: 1.1rem;
-    padding: 10px 12px;
+  }
+
+  .task-list-empty p {
+    font-size: 0.8rem;
   }
 }
 
 @media (max-width: 480px) {
   .task-list-container {
-    padding: 0 8px;
+    padding: 0 4px; /* Minimal side padding */
   }
 
   .task-list-header {
-    padding: 12px;
-    margin-bottom: 16px;
+    padding: 4px; /* Very compact */
+    margin-bottom: 6px;
   }
 
   .task-count h3 {
-    font-size: 1.2rem;
+    font-size: 0.85rem;
+  }
+
+  .pagination-info {
+    font-size: 0.6rem;
   }
 
   .sort-btn {
-    padding: 6px 10px;
-    font-size: 0.8rem;
+    padding: 2px 3px;
+    font-size: 0.55rem; /* Very small */
+  }
+
+  .group-title {
+    font-size: 0.75rem;
+    padding: 3px 5px;
   }
 
   .empty-icon {
-    font-size: 3rem;
+    font-size: 1.8rem;
   }
 
   .task-list-empty {
-    padding: 40px 16px;
+    padding: 16px 6px;
+  }
+
+  .task-list-empty h3 {
+    font-size: 1rem;
+  }
+
+  .task-list-empty p {
+    font-size: 0.75rem;
+  }
+
+  .load-more-btn {
+    padding: 6px 12px;
+    font-size: 0.75rem;
   }
 }
